@@ -23,7 +23,7 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.logError(r, err)
 
-	message := "The server encountered a problem and could not process your request"
+	message := "the server encountered a problem and could not process your request"
 	app.errorResponse(w, r, http.StatusInternalServerError, message)
 }
 
@@ -32,11 +32,11 @@ func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request) {
-	message := "Requested resource is not found"
+	message := "requested resource is not found"
 	app.errorResponse(w,r, http.StatusNotFound, message)
 }
 
 func (app *application) methodNotAllowedResponse (w http.ResponseWriter, r *http.Request) {
-	message := fmt.Sprintf("Method %s is not supported", r.Method)
+	message := fmt.Sprintf("method %s is not supported", r.Method)
 	app.errorResponse(w, r, http.StatusMethodNotAllowed, message)
 }

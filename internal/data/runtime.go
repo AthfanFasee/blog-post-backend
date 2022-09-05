@@ -1,19 +1,46 @@
 package data
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
+var ErrInvalidRuntimeFormat = errors.New("invalid runtime format")
 type Runtime int32
 
-// This is a custom MarshalJSON func. Go will call this method to encode any value which uses this Runtime type in to JSON
+// This is a custom MarshalJSON func. Go will call this method to encode any value which got Runtime type in to JSON
 func (r Runtime) MarshalJSON() ([]byte, error) {
 
 	jsonValue := fmt.Sprintf("%d mins", r)
 
-	// By default this string under the hood, won't have a double quote. The double quote we see above is just a syntax thing in go
+	// A JSON string must be wrapped in double quotes
 	quotedJSONValue := strconv.Quote(jsonValue)
 
 	return []byte(quotedJSONValue), nil
+}
+
+// This is a custom UnmarshalJSON func. Go will call this method to decode any JSON value which got Runtime type in the destination
+func (r *Runtime) UnmarshalJSON(jsonValue []byte) error {
+	unquotedJSONValue, err := strconv.Unquote(string(jsonValue))
+	if err != nil {
+		return ErrInvalidRuntimeFormat
+	}
+
+	parts := strings.Split(unquotedJSONValue, " ")
+	
+	if len(parts) != 2 || parts[1] != "mins" {
+		return ErrInvalidRuntimeFormat
+	}
+
+	i, err := strconv.ParseInt(parts[0], 10, 32)
+	if err != nil {
+		return ErrInvalidRuntimeFormat
+	}
+
+	// Convert the int32 type to Runtime type, deference the receiver, and assign it to the underlying value of r
+	*r = Runtime(i)
+
+	return nil
 }
