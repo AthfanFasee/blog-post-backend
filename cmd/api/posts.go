@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/AthfanFasee/blog-post-backend/internal/data"
+	"github.com/AthfanFasee/blog-post-backend/internal/validator"
 )
 
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +31,20 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 	app.badRequestResponse(w, r, err)
 	return
 	}
+
+	movie := &data.Movie{
+		Title: input.Title,
+		Year: input.Year,
+		Runtime: input.Runtime,
+		Genres: input.Genres,
+	}
+	// Initialize a new Validator
+	v := validator.New()
+
+	if data.ValidatePost(v, movie); !v.Valid() {
+		app.validationFailedResponse(w, r, v.Errors)
+	}
+	
 	// Dump the contents of the input struct in a HTTP response.
 	fmt.Fprintf(w, "%+v\n", input)
 }
