@@ -17,6 +17,8 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodPost, "/api/v1/posts", app.createPostHandler)
 	router.HandlerFunc(http.MethodGet, "/api/v1/posts", app.showPostsHandler)
 	router.HandlerFunc(http.MethodGet, "/api/v1/posts/:id", app.showSinglePostHandler)
+	router.HandlerFunc(http.MethodPatch, "/api/v1/posts/:id", app.updatePostHandler)
+	router.HandlerFunc(http.MethodDelete, "/api/v1/posts/:id", app.deletePostHandler)
 
 	return router
 }

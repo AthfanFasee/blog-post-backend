@@ -41,7 +41,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 	
-	// This will return error if any field of JSON cannot be mapped to dst, instead og ignoring
+	// This will return error if any field of JSON cannot be mapped to dst, instead of ignoring
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	err := dec.Decode(dst)
