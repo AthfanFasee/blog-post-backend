@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS "posts" (
 "img" text,
 "read_time" int,
 "liked_by" int[],
-"created_by" int
+"created_by" int,
+"version" integer NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS "comments" (

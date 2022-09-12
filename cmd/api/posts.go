@@ -87,44 +87,74 @@ func (app *application) showPostsHandler (w http.ResponseWriter, r *http.Request
 func (app *application) updatePostHandler (w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 	if err != nil {
-		app.notFoundResponse(w, r)
+		app.badRequestResponse(w, r, err)
 	}
-	if id < 1 {
-		app.notFoundResponse(w, r)
+	
+	// Check if a post with provided id exists
+	post, err := app.models.Posts.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r , err)
+		}
+		return
 	}
 
+	// Define the input struct in a way, all the field got zero value 'nil'
 	var input struct {
-		Title string `json:"title"`
-		PostText string `json:"postText"`
-		Img string `json:"img"`
-		ReadTime data.ReadTime `json:"readTime"`
+		Title *string `json:"title"`
+		PostText *string `json:"postText"`
+		Img *string `json:"img"`
+		ReadTime *data.ReadTime `json:"readTime"`
 	}
 
 	// Decoding JSON values in to input struct
 	err = app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
+		return
 	}
-
-	// Copy values from req body and param to appropriate fields of post struct
-	post := &data.Post{
-		Title: input.Title,
-		PostText: input.PostText,
-		Img: input.Img,
-		ReadTime: input.ReadTime,
-		ID: id,
+	
+	// Copy values from req body to appropriate fields of post record
+	if input.Title != nil {
+		post.Title = *input.Title
+	}
+	if input.PostText != nil {
+		post.PostText = *input.PostText
+	}
+	if input.Img != nil {
+		post.Img = *input.Img
+	}
+	if input.ReadTime != nil {
+		post.ReadTime = *input.ReadTime
 	}
 
 	v := validator.New()
+
+	// Title and PostText must be provided by the client (other fields are optional)
+	if input.Title == nil {
+		v.AddError("title", "must be provided")
+	}
+	if input.PostText == nil {
+		v.AddError("postText", "must be provided")
+	}
 
 	if data.ValidatePost(v, post); !v.Valid() {
 		app.validationFailedResponse(w, r, v.Errors)
 		return
 	}
 
-	err = app.models.Posts.Update(post)
+	_, err = app.models.Posts.Update(post)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"post": post}, nil)

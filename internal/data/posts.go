@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -11,14 +12,15 @@ import (
 
 // Later change this struct and validator for Post
 type Post struct {
-ID int64 
-CreatedAt time.Time 
-Title string 
-PostText string
-Img string 
-ReadTime ReadTime // If we use our custom Runtime type here (which has the underlying type int32) go will use Runtime type's method MarshalJSON to encode this to JSON and it will be encoded to Runtime type (a string in the format "<runtime> mins") instead of int
-LikedBy []int 
-CreatedBy int64 
+ID int64 `json:"id"`
+CreatedAt time.Time `json:"createdAt"`
+Title string `json:"title"`
+PostText string `json:"postText"`
+Img string `json:"img"`
+ReadTime ReadTime `json:"readTime"` // If we use our custom Runtime type here (which has the underlying type int32) go will use Runtime type's method MarshalJSON to encode this to JSON and it will be encoded to Runtime type (a string in the format "<runtime> mins") instead of int
+LikedBy []int `json:"likedBy"`
+CreatedBy int64 `json:"createdBy"`
+Version int32 `json:"-"`
 }
 
 type PostModel struct {
@@ -33,7 +35,10 @@ func (p PostModel) Insert(post *Post) error {
 		
 	args := []interface{}{post.Title, post.PostText, post.Img, post.ReadTime, post.CreatedBy}
 
-	return p.DB.QueryRow(query, args...).Scan(&post.ID, &post.CreatedAt)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return p.DB.QueryRowContext(ctx, query, args...).Scan(&post.ID, &post.CreatedAt)
 }
 
 
@@ -44,13 +49,16 @@ func (p PostModel) Get(id int64) (*Post, error) {
 	}
 
 	query := `
-	SELECT id, title, post_text, img, read_time, liked_by, created_by, created_at 
+	SELECT id, title, post_text, img, read_time, liked_by, created_by, created_at, version
 	FROM posts
 	WHERE id = $1`
 
 	var post Post
 
-	err := p.DB.QueryRow(query, id).Scan(
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := p.DB.QueryRowContext(ctx, query, id).Scan(
 		&post.ID,
 		&post.Title,
 		&post.PostText,
@@ -59,6 +67,7 @@ func (p PostModel) Get(id int64) (*Post, error) {
 		pq.Array(&post.LikedBy),
 		&post.CreatedBy,
 		&post.CreatedAt,
+		&post.Version,
 	)
 
 	if err != nil {
@@ -75,11 +84,11 @@ func (p PostModel) Get(id int64) (*Post, error) {
 
 
 
-func (p PostModel) Update(post *Post) error {
+func (p PostModel) Update(post *Post) (sql.Result, error) {
 	query := `
 	UPDATE posts 
-	SET title = $1, post_text = $2, img = $3, read_time = $4 
-	WHERE id = $5`
+	SET title = $1, post_text = $2, img = $3, read_time = $4, version = version + 1
+	WHERE id = $5 AND version = $6`
 
 	args := []interface{}{
 		post.Title,
@@ -87,23 +96,27 @@ func (p PostModel) Update(post *Post) error {
 		post.Img,
 		post.ReadTime,
 		post.ID,
+		post.Version,
 	}
 
-	result, err := p.DB.Exec(query, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := p.DB.ExecContext(ctx, query, args...)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
+	if err != nil {		
+		return nil, err
 	}
 
 	if rowsAffected == 0 {
-		return ErrRecordNotFound
+		return nil, ErrEditConflict
 	}
 
-	return nil
+	return result, nil
 }
 
 func (p PostModel) Delete(id int64) error {
@@ -115,9 +128,17 @@ func (p PostModel) Delete(id int64) error {
 	DELETE FROM posts
 	WHERE id = $1`
 
-	result, err := p.DB.Exec(query, id)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := p.DB.ExecContext(ctx, query, id)
 	if err != nil {
-		return err
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err
+		}
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -126,7 +147,7 @@ func (p PostModel) Delete(id int64) error {
 	}
 
 	if rowsAffected == 0 {
-		return ErrRecordNotFound
+		return ErrEditConflict
 	}
 
 	return nil
