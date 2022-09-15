@@ -9,6 +9,71 @@ import (
 	"github.com/AthfanFasee/blog-post-backend/internal/validator"
 )
 
+func (app *application) showPostsHandler (w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Title string
+		Genres []string
+		data.Filters
+	}
+
+	v := validator.New()
+
+	// Get the url.Values map containing the query string data
+	queryString := r.URL.Query()
+
+	input.Filters.Sort = app.readString(queryString, "sort", "-id")
+	input.Title = app.readString(queryString, "title", "")
+	input.Genres = app.readCSV(queryString, "genres", []string{})
+	input.Filters.Page = app.readInt(queryString, "page", 1, v)
+	input.Filters.ID = app.readInt(queryString, "id", 0, v)
+	input.Filters.Limit = app.readInt(queryString, "limit", 6, v)
+
+	// Add the supported sort values for this endpoint to the sort safelist.
+	// NEED TO FIGURE OUT MULTIPLE SORTING. ONE THIMNG IS U CAN USE CSV HELPER FOR SORTINGS TOO
+	input.Filters.SortSafeList = []string{"id", "title", "readtime", "likescount", "-id", "-title", "-readtime", "-likescount"}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.validationFailedResponse(w, r, v.Errors)
+		return
+	}
+
+	posts, metadata, err := app.models.Posts.GetAll(input.Title, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"posts": posts, "metadata": metadata}, nil)
+	if err != nil {
+		app.serverErrorResponse(w,r, err)
+	}
+}
+
+func (app *application) showSinglePostHandler (w http.ResponseWriter, r *http.Request) {
+	
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+	
+	post, err := app.models.Posts.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"post": post}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Title string `json:"title"`
@@ -53,35 +118,6 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-}
-
-func (app *application) showSinglePostHandler (w http.ResponseWriter, r *http.Request) {
-	
-	id, err := app.readIDParam(r)
-	if err != nil {
-		app.notFoundResponse(w, r)
-		return
-	}
-	
-	post, err := app.models.Posts.Get(id)
-	if err != nil {
-		switch {
-		case errors.Is(err, data.ErrRecordNotFound):
-			app.notFoundResponse(w, r)
-		default:
-			app.serverErrorResponse(w, r, err)
-		}
-		return
-	}
-
-	err = app.writeJSON(w, http.StatusOK, envelope{"post": post}, nil)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-	}
-}
-
-func (app *application) showPostsHandler (w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Show all movies")
 }
 
 func (app *application) updatePostHandler (w http.ResponseWriter, r *http.Request) {

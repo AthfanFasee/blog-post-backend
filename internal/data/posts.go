@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/AthfanFasee/blog-post-backend/internal/validator"
@@ -27,21 +28,59 @@ type PostModel struct {
 	DB *sql.DB
 }
 
-func (p PostModel) Insert(post *Post) error {
-	query := `
-		INSERT INTO posts (title, post_text, img, read_time, created_by) 
-		VALUES ($1, $2, $3, $4, $5) 
-		RETURNING id, created_at`
-		
-	args := []interface{}{post.Title, post.PostText, post.Img, post.ReadTime, post.CreatedBy}
+func (p PostModel) GetAll(title string, filters Filters) ([]*Post, Metadata, error) {
+	query :=fmt.Sprintf(`
+	SELECT count(*) OVER(), id, title, post_text, img, read_time, liked_by, created_by, created_at
+	FROM posts
+	WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
+	AND (created_by = $2 OR $2 = 0)
+	ORDER BY %s %s, id %s
+	LIMIT $3 OFFSET $4`, filters.sortParam(), filters.sortDirection(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return p.DB.QueryRowContext(ctx, query, args...).Scan(&post.ID, &post.CreatedAt)
+	args := []interface{}{title, filters.ID, filters.limit(), filters.offset()}
+
+	rows, err := p.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+
+	defer rows.Close()
+
+	totalRecords := 0
+	posts := []*Post{}
+
+	for rows.Next() {
+		var post Post
+
+		err := rows.Scan(
+			&totalRecords,
+			&post.ID,
+			&post.Title,
+			&post.PostText,
+			&post.Img,
+			&post.ReadTime,
+			pq.Array(&post.LikedBy),
+			&post.CreatedBy,
+			&post.CreatedAt,
+		)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+
+		posts = append(posts, &post)
+	}
+
+	 if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	 }
+
+	 metadata := calculateMetadata(totalRecords, filters.Page, filters.Limit)
+
+	 return posts, metadata, nil
 }
-
-
 
 func (p PostModel) Get(id int64) (*Post, error) {
 	if id < 1 {
@@ -82,7 +121,19 @@ func (p PostModel) Get(id int64) (*Post, error) {
 	return &post, nil	
 }
 
+func (p PostModel) Insert(post *Post) error {
+	query := `
+		INSERT INTO posts (title, post_text, img, read_time, created_by) 
+		VALUES ($1, $2, $3, $4, $5) 
+		RETURNING id, created_at`
+		
+	args := []interface{}{post.Title, post.PostText, post.Img, post.ReadTime, post.CreatedBy}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return p.DB.QueryRowContext(ctx, query, args...).Scan(&post.ID, &post.CreatedAt)
+}
 
 func (p PostModel) Update(post *Post) (sql.Result, error) {
 	query := `

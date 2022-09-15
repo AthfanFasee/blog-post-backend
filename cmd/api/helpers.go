@@ -6,14 +6,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
+	"github.com/AthfanFasee/blog-post-backend/internal/validator"
 	"github.com/julienschmidt/httprouter"
 )
 
 type envelope map[string]interface{}
 
+// Encode data into JSON
 func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 	// MarshalIndent will return a []byte containing the encoded JSON with any prefix and indent added
 	js, err := json.MarshalIndent(data, "", "\t")
@@ -36,6 +39,7 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 	return nil
 }
 
+// Decode JSON values
 func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	// Limit the size of body to 1MB
 	maxBytes := 1_048_576
@@ -95,6 +99,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 	return nil
 }
 
+// Read ID param from request url
 func (app *application) readIDParam(r *http.Request) (int64, error) {
 	// Retrieve a slice containing req parameter names and values
 	params := httprouter.ParamsFromContext(r.Context())
@@ -105,4 +110,44 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 	}
 
 	return id, nil
+}
+
+// Return a string value from query string map or a default value
+func (app *application) readString(queryString url.Values, key string, defaultValue string) string {
+	stringValue := queryString.Get(key)
+
+	// Get() will return empty string if value is'nt found. Then we return default value
+	if stringValue == "" {
+		return defaultValue
+	}
+
+	return stringValue
+}
+
+// Return a []string value from query string map or a default value
+func (app *application) readCSV(queryString url.Values, key string, defaultValue []string) []string {
+	csvValue := queryString.Get(key)
+	
+	if csvValue == "" {
+		return defaultValue
+	}
+
+	return strings.Split(csvValue, ",")
+}
+
+// Return an int value from query string map or a default value
+func (app *application) readInt(queryString url.Values, key string, defaultValue int, v *validator.Validator) int {
+	stringValue := queryString.Get(key)
+
+	if stringValue == "" {
+		return defaultValue
+	}
+
+	intValue, err := strconv.Atoi(stringValue)
+	if err != nil {
+		v.AddError(key, "must be an integer value")
+		return defaultValue
+	}
+
+	return intValue
 }
