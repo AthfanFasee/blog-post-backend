@@ -6,7 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) routes() *httprouter.Router {
+func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
 	// Converting our err helpers as handlers and using them instead of default err handlers
@@ -20,5 +20,5 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodPatch, "/api/v1/posts/:id", app.updatePostHandler)
 	router.HandlerFunc(http.MethodDelete, "/api/v1/posts/:id", app.deletePostHandler)
 
-	return router
+	return app.recoverPanic(router)
 }
