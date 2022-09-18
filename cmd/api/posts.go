@@ -102,6 +102,7 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 
 	if data.ValidatePost(v, post); !v.Valid() {
 		app.validationFailedResponse(w, r, v.Errors)
+		return
 	}
 
 	err = app.models.Posts.Insert(post)
@@ -182,7 +183,7 @@ func (app *application) updatePostHandler (w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	_, err = app.models.Posts.Update(post)
+	err = app.models.Posts.Update(post)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrEditConflict):

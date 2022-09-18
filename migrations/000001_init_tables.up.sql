@@ -15,13 +15,16 @@ CREATE TABLE IF NOT EXISTS "comments" (
 "created_at" timestamp(0) with time zone NOT NULL DEFAULT NOW(),
 "text" text NOT NULL,
 "created_by" int,
-"post_id" int
+"post_id" int,
+"version" integer NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS "users" (
 "id" bigserial PRIMARY KEY,
 "created_at" timestamp(0) with time zone NOT NULL DEFAULT NOW(),
 "name" text NOT NULL,
-"email" text NOT NULL,
-"password" text NOT NULL
+"email" citext UNIQUE NOT NULL,
+"password_hash" bytea NOT NULL,
+"activated" BOOLEAN NOT NULL,
+"version" integer NOT NULL DEFAULT 1
 );

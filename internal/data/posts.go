@@ -135,7 +135,7 @@ func (p PostModel) Insert(post *Post) error {
 	return p.DB.QueryRowContext(ctx, query, args...).Scan(&post.ID, &post.CreatedAt)
 }
 
-func (p PostModel) Update(post *Post) (sql.Result, error) {
+func (p PostModel) Update(post *Post) error {
 	query := `
 	UPDATE posts 
 	SET title = $1, post_text = $2, img = $3, read_time = $4, version = version + 1
@@ -155,19 +155,19 @@ func (p PostModel) Update(post *Post) (sql.Result, error) {
 
 	result, err := p.DB.ExecContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {		
-		return nil, err
+		return err
 	}
 
 	if rowsAffected == 0 {
-		return nil, ErrEditConflict
+		return ErrEditConflict
 	}
 
-	return result, nil
+	return nil
 }
 
 func (p PostModel) Delete(id int64) error {
