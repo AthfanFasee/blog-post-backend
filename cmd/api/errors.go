@@ -39,22 +39,45 @@ func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request)
 	app.errorResponse(w,r, http.StatusNotFound, message)
 }
 
-func (app *application) methodNotAllowedResponse (w http.ResponseWriter, r *http.Request) {
+func (app *application) methodNotAllowedResponse(w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf("method %s is not supported", r.Method)
 	app.errorResponse(w, r, http.StatusMethodNotAllowed, message)
 }
 
-func (app *application) validationFailedResponse (w http.ResponseWriter, r *http.Request, errors map[string]string) {
+func (app *application) validationFailedResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
 	app.errorResponse(w, r, http.StatusUnprocessableEntity, errors)
 }
 
-func (app *application) editConflictResponse (w http.ResponseWriter, r *http.Request) {
+func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Request) {
 	message := "unable to update the record due to an edit conflict, please try again"
 	app.errorResponse(w, r, http.StatusConflict, message)
 }
 
-func (app *application) rateLimitExceededResponse (w http.ResponseWriter, r *http.Request) {
+func (app *application) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
 	message := "rate limit exceeded"
 	app.errorResponse(w, r, http.StatusTooManyRequests, message)
 }
 
+func (app *application) invalidCredentialsResponse(w http.ResponseWriter, r *http.Request) {
+	message := "invalid email or password"
+	app.errorResponse(w, r, http.StatusUnauthorized, message)
+}
+
+func (app *application) invalidAuthenticationTokenResponse(w http.ResponseWriter, r *http.Request) {
+	// Inform client that we expect them to authenticate using a bearer token
+	w.Header().Set("WWWW-Authenticate", "Bearer")
+
+	message := "authentication token is invalid or missing"
+	app.errorResponse(w, r, http.StatusUnauthorized, message)
+}
+
+func (app *application) authenticationRequiredResponse(w http.ResponseWriter, r *http.Request) {
+	message := "you must be authenticated to access this resource"
+	app.errorResponse(w, r, http.StatusUnauthorized, message)
+}
+
+func (app *application) inactiveAccountResponse(w http.ResponseWriter, r *http.Request) {
+	message := "your user account must be activated to access this resource"
+	app.errorResponse(w, r, http.StatusForbidden, message)
+}
+	

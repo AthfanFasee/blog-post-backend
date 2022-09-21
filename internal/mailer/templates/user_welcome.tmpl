@@ -1,0 +1,40 @@
+{{define "subject"}}Welcome to Athfan's BlogPost Site!{{end}}
+
+{{define "plainBody"}}
+Hi,
+Thanks trying out my blog post site. This email is for testing purpose only!
+For future reference, your user ID number is {{.ID}}.
+Please send a request to the `PUT api/v1/auth/activate` endpoint with the following JSON
+body to activate your account:
+{"token": "{{.activationToken}}"}
+Please note that this is a one-time use token and is only valid for 1 day.
+Thanks,
+Athfan Fasee
+{{end}}
+
+{{define "htmlBody"}}
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+
+<body>
+    <p>Hi,</p>
+    <p>Thanks trying out my blog post site. This email is for testing purpose only!</p>
+    <p>For future reference, your user ID number is {{.ID}}.</p>
+    <p>Please send a request to the <code>PUT /v1/users/activate</code> endpoint with the
+    following JSON body to activate your account:</p>
+    <pre><code>
+    {"token": "{{.activationToken}}"}
+    </code></pre>
+    <p>Please note that this is a one-time use token and is only valid for 1 day.</p>
+
+    <p>Thanks,</p>
+    <p>Athfan Fasee</p>
+</body>
+
+</html>
+{{end}}
+

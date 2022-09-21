@@ -14,11 +14,16 @@ func (app *application) routes() http.Handler {
 	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
 
 	router.HandlerFunc(http.MethodGet, "/api/v1/healthcheck", app.healthCheckHandler)
-	router.HandlerFunc(http.MethodPost, "/api/v1/posts", app.createPostHandler)
-	router.HandlerFunc(http.MethodGet, "/api/v1/posts", app.showPostsHandler)
-	router.HandlerFunc(http.MethodGet, "/api/v1/posts/:id", app.showSinglePostHandler)
-	router.HandlerFunc(http.MethodPatch, "/api/v1/posts/:id", app.updatePostHandler)
-	router.HandlerFunc(http.MethodDelete, "/api/v1/posts/:id", app.deletePostHandler)
+	
+	router.HandlerFunc(http.MethodGet, "/api/v1/posts",  app.requireAuthenticatedUser(app.showPostsHandler))
+	router.HandlerFunc(http.MethodGet, "/api/v1/posts/:id", app.requireAuthenticatedUser(app.showSinglePostHandler))
+	router.HandlerFunc(http.MethodPost, "/api/v1/posts",  app.requireActivatedUser(app.createPostHandler))
+	router.HandlerFunc(http.MethodPatch, "/api/v1/posts/:id", app.requireActivatedUser(app.updatePostHandler))
+	router.HandlerFunc(http.MethodDelete, "/api/v1/posts/:id", app.requireActivatedUser(app.deletePostHandler))
 
-	return app.recoverPanic(app.rateLimit(router))
+	router.HandlerFunc(http.MethodPost, "/api/v1/auth/register", app.registerUserHandler)
+	router.HandlerFunc(http.MethodPut, "/api/v1/auth/activate", app.activateUserHandler)
+	router.HandlerFunc(http.MethodPost, "/api/v1/auth/login", app.createAuthenticationTokenHandler)
+
+	return app.recoverPanic(app.rateLimit(app.authenticate(router)))
 }

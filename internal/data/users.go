@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"time"
@@ -14,6 +15,8 @@ var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
+var AnonymousUser = &User{}
+
 type User struct {
 	ID        int64   	`json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
@@ -22,6 +25,10 @@ type User struct {
 	Password  password  `json:"-"`
 	Activated bool   	`json:"activated"`
 	Version   int       `json:"-"`
+}
+
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
 }
 
 type password struct {
@@ -107,7 +114,7 @@ func (u UserModel) Update(user *User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	
-	result, err := u.DB.ExecContext(ctx, query, args)
+	result, err := u.DB.ExecContext(ctx, query, args...)
 	if err != nil {
 		switch {
 			case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
@@ -127,6 +134,46 @@ func (u UserModel) Update(user *User) error {
 	}
 
 	return nil
+}
+
+func (u UserModel) GetForToken(tokenScope, tokenPlainText string) (*User, error) {
+	query := `
+	SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.activated, users.version
+	FROM users
+	INNER JOIN tokens
+	ON users.id = tokens.user_id
+	WHERE tokens.hash = $1
+	AND tokens.scope = $2
+	AND tokens.expiry > $3`
+
+	tokenHash := sha256.Sum256([]byte(tokenPlainText))
+
+	args := []interface{}{tokenHash[:], tokenScope, time.Now()}
+
+	var user User
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := u.DB.QueryRowContext(ctx, query, args...).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.Activated,
+		&user.Version,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &user, nil
 }
 
 // Password related

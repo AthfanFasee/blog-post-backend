@@ -171,10 +171,10 @@ func (app *application) updatePostHandler (w http.ResponseWriter, r *http.Reques
 	v := validator.New()
 
 	// Title and PostText must be provided by the client (other fields are optional)
-	if input.Title == nil {
+	if nil == input.Title {
 		v.AddError("title", "must be provided")
 	}
-	if input.PostText == nil {
+	if nil == input.PostText {
 		v.AddError("postText", "must be provided")
 	}
 
