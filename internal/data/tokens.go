@@ -12,16 +12,16 @@ import (
 )
 
 const (
-	ScopeActivation = "activation"
+	ScopeActivation     = "activation"
 	ScopeAuthentication = "authentication"
 )
 
 type Token struct {
-	Plaintext string 	`json:"token"`
-	Hash      []byte	`json:"-"`
-	UserID    int64		`json:"userID"`
-	Expiry    time.Time	`json:"expiry"`
-	Scope     string	`json:"-"`
+	Plaintext string    `json:"token"`
+	Hash      []byte    `json:"-"`
+	UserID    int64     `json:"userID"`
+	Expiry    time.Time `json:"expiry"`
+	Scope     string    `json:"-"`
 }
 
 type TokenModel struct {
@@ -33,7 +33,7 @@ func generateToken(userID int64, timeToLive time.Duration, scope string) (*Token
 	token := &Token{
 		UserID: userID,
 		Expiry: time.Now().Add(timeToLive),
-		Scope: scope,
+		Scope:  scope,
 	}
 
 	randomBytes := make([]byte, 16)
@@ -90,7 +90,6 @@ func (t TokenModel) DeleteAllForUser(scope string, userID int64) error {
 
 	return err
 }
-	
 
 func ValidateTokenPlainText(v *validator.Validator, tokenPlainText string) {
 	v.Check(tokenPlainText != "", "token", "must be provided")

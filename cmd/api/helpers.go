@@ -44,7 +44,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 	// Limit the size of body to 1MB
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
-	
+
 	// This will return error if any field of JSON cannot be mapped to dst, instead of ignoring
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
@@ -61,30 +61,30 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 		// This err comes when we pass a nil pointer. Unexpected errors from Server better be handled by panic()
 		case errors.As(err, &invalidUnmarshalError):
 			panic(err)
-		
+
 		case errors.As(err, &syntaxError):
 			return fmt.Errorf("body contains badly-formed JSON (at character %d)", syntaxError.Offset)
-		
+
 		case errors.As(err, &unmarshalTypeError):
 			// Field means the key or field in JSON object and It could be empty as well
 			if unmarshalTypeError.Field != "" {
 				return fmt.Errorf("body contains incorrect JSON type for field %q", unmarshalTypeError.Field)
 			}
 			return fmt.Errorf("body contains incorrect JSON type (at character %d", unmarshalTypeError.Offset)
-		
+
 		case errors.Is(err, io.ErrUnexpectedEOF):
 			return errors.New("body contains badly-formed JSON")
 
 		case errors.Is(err, io.EOF):
 			return errors.New("body must not be empty")
-		
+
 		case strings.HasPrefix(err.Error(), "json: unknown field"):
 			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field")
 			return fmt.Errorf("body contains unknown field %s", fieldName)
-		
+
 		case err.Error() == "http: request body too large":
 			return fmt.Errorf("body cannot be larger than %d bytes", maxBytes)
-		
+
 		default:
 			return err
 		}
@@ -127,7 +127,7 @@ func (app *application) readString(queryString url.Values, key string, defaultVa
 // Return a []string value from query string map or a default value
 func (app *application) readCSV(queryString url.Values, key string, defaultValue []string) []string {
 	csvValue := queryString.Get(key)
-	
+
 	if csvValue == "" {
 		return defaultValue
 	}
@@ -165,7 +165,7 @@ func (app *application) background(fn func()) {
 				app.logger.PrintError(fmt.Errorf("%s", err), nil)
 			}
 		}()
-		
+
 		fn()
 	}()
 }

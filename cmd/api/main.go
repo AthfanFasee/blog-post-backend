@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"database/sql"
+	"expvar"
 	"flag"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -15,34 +17,33 @@ import (
 	_ "github.com/lib/pq"
 )
 
-
 const version = "1.0.0"
 
 // Configuration settings
 type config struct {
 	port int
-	env string
-	db struct {
-		dsn string
+	env  string
+	db   struct {
+		dsn          string
 		maxOpenConns int
 		maxIdleConns int
-		maxIdleTime string
+		maxIdleTime  string
 	}
 	limiter struct {
-		rps float64
-		burst int
+		rps     float64
+		burst   int
 		enabled bool
 	}
 	smtp struct {
-		host string
-		port int
+		host     string
+		port     int
 		username string
 		password string
-		sender string
+		sender   string
 	}
 	cors struct {
 		trustedOrigins []string
-	}		
+	}
 }
 
 // Application dependencies
@@ -51,7 +52,7 @@ type application struct {
 	logger *jsonlog.Logger
 	models data.Models
 	mailer mailer.Mailer
-	wg sync.WaitGroup
+	wg     sync.WaitGroup
 }
 
 func main() {
@@ -77,7 +78,7 @@ func main() {
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "5d28364237258a", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "aththaar47@gmail.com", "SMTP sender")
 	// Cors related
-	flag.Func("cors-trusted-origins", "Trusted CORS origins(separated by space)", func (val string) error {
+	flag.Func("cors-trusted-origins", "Trusted CORS origins(separated by space)", func(val string) error {
 		cfg.cors.trustedOrigins = strings.Fields(val)
 		return nil
 	})
@@ -88,12 +89,24 @@ func main() {
 
 	// LETS try and change this to cfg.db.dsn later
 	db, err := openDB(cfg)
-	if err !=nil {
+	if err != nil {
 		logger.PrintFatal(err, nil)
 	}
-	
+
 	defer db.Close()
 	logger.PrintInfo("database connection pool established", nil)
+
+	// Custom and Dynamic Metrics
+	expvar.NewString("version").Set(version)
+	expvar.Publish("goroutines", expvar.Func(func() interface{} {
+		return runtime.NumGoroutine()
+	}))
+	expvar.Publish("database", expvar.Func(func() interface{} {
+		return db.Stats()
+	}))
+	expvar.Publish("timestamp", expvar.Func(func() interface{} {
+		return time.Now().Unix()
+	}))
 
 	app := &application{
 		config: cfg,
@@ -123,7 +136,7 @@ func openDB(cfg config) (*sql.DB, error) {
 	db.SetMaxOpenConns(cfg.db.maxOpenConns)
 	db.SetMaxIdleConns(cfg.db.maxIdleConns)
 	db.SetConnMaxIdleTime(idleDuration)
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

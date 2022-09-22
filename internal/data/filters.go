@@ -8,7 +8,7 @@ import (
 )
 
 type Filters struct {
-	ID			int
+	ID           int
 	Page         int
 	Limit        int
 	Sort         string
@@ -17,7 +17,7 @@ type Filters struct {
 
 func (f Filters) sortParam() string {
 	var sortParam string
-	for _,safeValue := range f.SortSafeList {
+	for _, safeValue := range f.SortSafeList {
 		if f.Sort == safeValue {
 			switch {
 			case f.Sort == "-likesCount":
@@ -25,25 +25,25 @@ func (f Filters) sortParam() string {
 			default:
 				sortParam = strings.TrimPrefix(f.Sort, "-")
 			}
-			return  sortParam
+			return sortParam
 		}
 	}
 	panic("unsafe sort parameter: " + f.Sort)
 }
 
-func (f Filters) sortDirection () string {
+func (f Filters) sortDirection() string {
 	if strings.HasPrefix(f.Sort, "-") {
 		return "DESC"
 	}
 	return "ASC"
 }
 
-func (f Filters) limit () int {
+func (f Filters) limit() int {
 	return f.Limit
 }
 
-func (f Filters) offset () int {
-	return (f.Page -1) * f.Limit
+func (f Filters) offset() int {
+	return (f.Page - 1) * f.Limit
 }
 
 func ValidateFilters(v *validator.Validator, f Filters) {
@@ -60,10 +60,10 @@ func ValidateFilters(v *validator.Validator, f Filters) {
 }
 
 type Metadata struct {
-	CurrentPage int `json:"current_page,omitempty"`
-	PageSize int `json:"page_size,omitempty"`
-	FirstPage int `json:"first_page,omitempty"`
-	LastPage int `json:"last_page,omitempty"`
+	CurrentPage  int `json:"current_page,omitempty"`
+	PageSize     int `json:"page_size,omitempty"`
+	FirstPage    int `json:"first_page,omitempty"`
+	LastPage     int `json:"last_page,omitempty"`
 	TotalRecords int `json:"total_records,omitempty"`
 }
 
@@ -73,10 +73,10 @@ func calculateMetadata(totalRecords, page, limit int) Metadata {
 	}
 
 	return Metadata{
-		CurrentPage: page,
-		PageSize: limit,
-		FirstPage: 1,
-		LastPage: int(math.Ceil(float64(totalRecords) / float64(limit))),
+		CurrentPage:  page,
+		PageSize:     limit,
+		FirstPage:    1,
+		LastPage:     int(math.Ceil(float64(totalRecords) / float64(limit))),
 		TotalRecords: totalRecords,
 	}
 }

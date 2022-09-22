@@ -7,19 +7,19 @@ import (
 
 var (
 	ErrRecordNotFound = errors.New("record not found")
-	ErrEditConflict = errors.New("edit conflict")
+	ErrEditConflict   = errors.New("edit conflict")
 )
 
 type Models struct {
-	Posts PostModel
+	Posts  PostModel
 	Tokens TokenModel
-	Users UserModel
+	Users  UserModel
 }
 
 func NewModels(db *sql.DB) Models {
 	return Models{
-		Posts: PostModel{DB: db},
+		Posts:  PostModel{DB: db},
 		Tokens: TokenModel{DB: db},
-		Users: UserModel{DB: db},
+		Users:  UserModel{DB: db},
 	}
 }

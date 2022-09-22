@@ -2,15 +2,18 @@ package main
 
 import (
 	"errors"
+	"expvar"
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/AthfanFasee/blog-post-backend/internal/data"
 	"github.com/AthfanFasee/blog-post-backend/internal/validator"
+	"github.com/felixge/httpsnoop"
 	"golang.org/x/time/rate"
 )
 
@@ -30,12 +33,12 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 
 func (app *application) rateLimit(next http.Handler) http.Handler {
 	type client struct {
-		limiter *rate.Limiter
+		limiter  *rate.Limiter
 		lastSeen time.Time
 	}
-	
+
 	var (
-		mu  sync.Mutex
+		mu      sync.Mutex
 		clients = make(map[string]*client)
 	)
 
@@ -44,7 +47,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 			time.Sleep(time.Minute)
 
 			mu.Lock()
-			
+
 			// If a client has'nt been within last 5 mins, delete their entry from map
 			for ip, client := range clients {
 				if time.Since(client.lastSeen) > 5*time.Minute {
@@ -55,7 +58,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 			mu.Unlock()
 		}
 	}()
-	
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if app.config.limiter.enabled {
 			// Extract client's IP address from request
@@ -90,7 +93,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 }
 
 func (app *application) authenticate(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {	
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Vary", "Authorization")
 
 		authorizationHeader := r.Header.Get("Authorization")
@@ -100,7 +103,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		
+
 		headerParts := strings.Split(authorizationHeader, " ")
 
 		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
@@ -116,7 +119,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			app.invalidAuthenticationTokenResponse(w, r)
 			return
 		}
-		
+
 		user, err := app.models.Users.GetForToken(data.ScopeAuthentication, token)
 		if err != nil {
 			switch {
@@ -131,7 +134,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 		r = app.contextSetUser(r, user)
 
 		next.ServeHTTP(w, r)
-			
+
 	})
 }
 
@@ -139,12 +142,12 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 func (app *application) requireAuthenticatedUser(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := app.contextGetUser(r)
-		
+
 		if user.IsAnonymous() {
 			app.authenticationRequiredResponse(w, r)
 			return
 		}
-		
+
 		next.ServeHTTP(w, r)
 	})
 }
@@ -170,7 +173,7 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 		w.Header().Add("Vary", "Origin")
 
 		w.Header().Add("Vary", "Access-Control-Request-Method")
-		
+
 		origin := r.Header.Get("Origin")
 
 		if origin != "" && len(app.config.cors.trustedOrigins) != 0 {
@@ -190,9 +193,31 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 						return
 					}
 				}
-			}	
+			}
 		}
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) metrics(next http.Handler) http.Handler {
+	totalRequestsReceived := expvar.NewInt("total_requests_received")
+	totalResponsesSent := expvar.NewInt("total_responses_sent")
+	totalProcessingTimeMicroseconds := expvar.NewInt("total_processing_time_μs")
+	totalResponsesSentByStatus := expvar.NewMap("total_responses_sent_by_status")
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		totalRequestsReceived.Add(1)
+
+		// httpsnoop.CaptureMetrics() Passes next handler in the chain along with the existing w and r to get metrics info
+		metrics := httpsnoop.CaptureMetrics(next, w, r)
+
+		totalResponsesSent.Add(1)
+
+		totalProcessingTimeMicroseconds.Add(metrics.Duration.Microseconds())
+
+		// Add one to the specific status code in our map
+		totalResponsesSentByStatus.Add(strconv.Itoa(metrics.Code), 1)
 	})
 }

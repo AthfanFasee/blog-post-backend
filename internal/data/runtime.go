@@ -8,6 +8,7 @@ import (
 )
 
 var ErrInvalidRuntimeFormat = errors.New("invalid runtime format")
+
 type ReadTime int32
 
 // This is a custom MarshalJSON func. Go will call this method to encode any value which got Runtime type in to JSON
@@ -29,7 +30,7 @@ func (r *ReadTime) UnmarshalJSON(jsonValue []byte) error {
 	}
 
 	parts := strings.Split(unquotedJSONValue, " ")
-	
+
 	if len(parts) != 2 || parts[1] != "mins" {
 		return ErrInvalidRuntimeFormat
 	}

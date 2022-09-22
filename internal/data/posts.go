@@ -13,15 +13,15 @@ import (
 
 // Later change this struct and validator for Post
 type Post struct {
-ID int64 `json:"id"`
-CreatedAt time.Time `json:"createdAt"`
-Title string `json:"title"`
-PostText string `json:"postText"`
-Img string `json:"img"`
-ReadTime ReadTime `json:"readTime"` // If we use our custom Runtime type here (which has the underlying type int32) go will use Runtime type's method MarshalJSON to encode this to JSON and it will be encoded to Runtime type (a string in the format "<runtime> mins") instead of int
-LikedBy []int `json:"likedBy"`
-CreatedBy int64 `json:"createdBy"`
-Version int32 `json:"-"`
+	ID        int64     `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	Title     string    `json:"title"`
+	PostText  string    `json:"postText"`
+	Img       string    `json:"img"`
+	ReadTime  ReadTime  `json:"readTime"` // If we use our custom Runtime type here (which has the underlying type int32) go will use Runtime type's method MarshalJSON to encode this to JSON and it will be encoded to Runtime type (a string in the format "<runtime> mins") instead of int
+	LikedBy   []int     `json:"likedBy"`
+	CreatedBy int64     `json:"createdBy"`
+	Version   int32     `json:"-"`
 }
 
 type PostModel struct {
@@ -29,7 +29,7 @@ type PostModel struct {
 }
 
 func (p PostModel) GetAll(title string, filters Filters) ([]*Post, Metadata, error) {
-	query :=fmt.Sprintf(`
+	query := fmt.Sprintf(`
 	SELECT count(*) OVER(), id, title, post_text, img, read_time, liked_by, created_by, created_at
 	FROM posts
 	WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
@@ -73,13 +73,13 @@ func (p PostModel) GetAll(title string, filters Filters) ([]*Post, Metadata, err
 		posts = append(posts, &post)
 	}
 
-	 if err = rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, Metadata{}, err
-	 }
+	}
 
-	 metadata := calculateMetadata(totalRecords, filters.Page, filters.Limit)
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.Limit)
 
-	 return posts, metadata, nil
+	return posts, metadata, nil
 }
 
 func (p PostModel) Get(id int64) (*Post, error) {
@@ -118,7 +118,7 @@ func (p PostModel) Get(id int64) (*Post, error) {
 		}
 	}
 
-	return &post, nil	
+	return &post, nil
 }
 
 func (p PostModel) Insert(post *Post) error {
@@ -126,7 +126,7 @@ func (p PostModel) Insert(post *Post) error {
 		INSERT INTO posts (title, post_text, img, read_time, created_by) 
 		VALUES ($1, $2, $3, $4, $5) 
 		RETURNING id, created_at`
-		
+
 	args := []interface{}{post.Title, post.PostText, post.Img, post.ReadTime, post.CreatedBy}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -159,7 +159,7 @@ func (p PostModel) Update(post *Post) error {
 	}
 
 	rowsAffected, err := result.RowsAffected()
-	if err != nil {		
+	if err != nil {
 		return err
 	}
 
@@ -207,10 +207,10 @@ func (p PostModel) Delete(id int64) error {
 func ValidatePost(v *validator.Validator, post *Post) {
 	v.Check(post.Title != "", "title", "must be provided")
 	v.Check(len(post.Title) <= 100, "title", "can only contain 100 characters or less")
-	
+
 	v.Check(post.PostText != "", "postText", "must be provided")
 	v.Check(post.Img != "", "img", "must be provided")
-	
+
 	v.Check(post.ReadTime != 0, "readTime", "must be provided")
 	v.Check(post.ReadTime > 0, "readTime", "must be provided")
 }

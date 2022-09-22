@@ -18,12 +18,12 @@ var (
 var AnonymousUser = &User{}
 
 type User struct {
-	ID        int64   	`json:"id"`
+	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
-	Name      string   	`json:"name"`
-	Email     string  	`json:"email"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
 	Password  password  `json:"-"`
-	Activated bool   	`json:"activated"`
+	Activated bool      `json:"activated"`
 	Version   int       `json:"-"`
 }
 
@@ -32,12 +32,12 @@ func (u *User) IsAnonymous() bool {
 }
 
 type password struct {
-	plainText  *string
-	hash       []byte
+	plainText *string
+	hash      []byte
 }
 
 type UserModel struct {
-	DB  *sql.DB
+	DB *sql.DB
 }
 
 func (u UserModel) Insert(user *User) error {
@@ -54,10 +54,10 @@ func (u UserModel) Insert(user *User) error {
 	err := u.DB.QueryRowContext(ctx, query, args...).Scan(&user.ID, &user.CreatedAt)
 	if err != nil {
 		switch {
-			case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-				return ErrDuplicateEmail
-			default:
-				return err
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		default:
+			return err
 		}
 	}
 
@@ -113,19 +113,19 @@ func (u UserModel) Update(user *User) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	
+
 	result, err := u.DB.ExecContext(ctx, query, args...)
 	if err != nil {
 		switch {
-			case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-				return ErrDuplicateEmail
-			default:
-				return err
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		default:
+			return err
 		}
 	}
 
 	rowsAffected, err := result.RowsAffected()
-	if err != nil {		
+	if err != nil {
 		return err
 	}
 
@@ -220,7 +220,7 @@ func ValidateUser(v *validator.Validator, user *User) {
 	v.Check(len(user.Name) <= 500, "name", "must not be more than 500 bytes long")
 
 	ValidateEmail(v, user.Email)
-	
+
 	if user.Password.plainText != nil {
 		ValidatePasswordPlaintext(v, *user.Password.plainText)
 	}

@@ -32,14 +32,14 @@ func (l Level) String() string {
 }
 
 type Logger struct {
-	out 		io.Writer
-	minLevel 	Level
-	mu         sync.Mutex
+	out      io.Writer
+	minLevel Level
+	mu       sync.Mutex
 }
 
 func New(out io.Writer, minLevel Level) *Logger {
 	return &Logger{
-		out:     out,
+		out:      out,
 		minLevel: minLevel,
 	}
 }
@@ -63,16 +63,16 @@ func (l *Logger) print(level Level, message string, properties map[string]string
 
 	// Declare an anonymous struct holding the data for the log entry.
 	aux := struct {
-	Level string `json:"level"`
-	Time string `json:"time"`
-	Message string `json:"message"`
-	Properties map[string]string `json:"properties,omitempty"`
-	Trace string `json:"trace,omitempty"`
+		Level      string            `json:"level"`
+		Time       string            `json:"time"`
+		Message    string            `json:"message"`
+		Properties map[string]string `json:"properties,omitempty"`
+		Trace      string            `json:"trace,omitempty"`
 	}{
-	Level: level.String(),
-	Time: time.Now().UTC().Format(time.RFC3339),
-	Message: message,
-	Properties: properties,
+		Level:      level.String(),
+		Time:       time.Now().UTC().Format(time.RFC3339),
+		Message:    message,
+		Properties: properties,
 	}
 
 	// Include a stack trace for entries at the ERROR and FATAL levels.
@@ -81,7 +81,7 @@ func (l *Logger) print(level Level, message string, properties map[string]string
 	}
 
 	var line []byte
-	
+
 	line, err := json.Marshal(aux)
 	if err != nil {
 		line = []byte(LevelError.String() + ": unable to marshal log message:" + err.Error())
@@ -90,7 +90,7 @@ func (l *Logger) print(level Level, message string, properties map[string]string
 	// Lock the mutex so that no two writes to the output destination cannot happen concurrently
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	
+
 	return l.out.Write(append(line, '\n'))
 }
 
