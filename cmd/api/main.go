@@ -18,9 +18,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const version = "1.0.0"
-
-var buildTime string
+var (
+	version string
+	buildTime string
+)
 
 // Configuration settings
 type config struct {
