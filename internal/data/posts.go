@@ -19,7 +19,7 @@ type Post struct {
 	PostText  string    `json:"postText"`
 	Img       string    `json:"img"`
 	ReadTime  ReadTime  `json:"readTime"` // If we use our custom Runtime type here (which has the underlying type int32) go will use Runtime type's method MarshalJSON to encode this to JSON and it will be encoded to Runtime type (a string in the format "<runtime> mins") instead of int
-	LikedBy   []int     `json:"likedBy"`
+	LikedBy   []int64    `json:"likedBy"`
 	CreatedBy int64     `json:"createdBy"`
 	Version   int32     `json:"-"`
 }
@@ -202,6 +202,32 @@ func (p PostModel) Delete(id int64) error {
 	}
 
 	return nil
+}
+
+func (p PostModel) AddLike(post *Post, userID int64) error {
+	// This SQL statement will prevent a user from liking a post twice
+	query :=`
+	UPDATE posts SET 
+	liked_by = (select array_agg(distinct x) from unnest(array_append(liked_by, $1)) t(x))
+	WHERE id = $2
+	RETURNING liked_by`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return p.DB.QueryRowContext(ctx, query, userID, post.ID).Scan(pq.Array(&post.LikedBy))
+}
+
+func (p PostModel) RemoveLike(post *Post, userID int64) error {
+	query :=`
+	UPDATE posts SET liked_by = array_remove(liked_by, $1)
+	WHERE id = $2
+	RETURNING liked_by`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return p.DB.QueryRowContext(ctx, query, userID, post.ID).Scan(pq.Array(&post.LikedBy))
 }
 
 func ValidatePost(v *validator.Validator, post *Post) {

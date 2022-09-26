@@ -222,3 +222,67 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+	}
+
+	// Check if a post with provided id exists
+	post, err := app.models.Posts.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	// LATER DONT PASS USERID from FRONTEND
+	user := app.contextGetUser(r)
+	
+	err = app.models.Posts.AddLike(post, user.ID)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"post": post}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+	}
+
+	// Check if a post with provided id exists
+	post, err := app.models.Posts.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	// LATER DONT PASS USERID from FRONTEND
+	user := app.contextGetUser(r)
+	
+	err = app.models.Posts.RemoveLike(post, user.ID)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"post": post}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
