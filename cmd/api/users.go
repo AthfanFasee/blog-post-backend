@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/AthfanFasee/blog-post-backend/internal/data"
@@ -23,8 +24,8 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	user := &data.User{
-		Name:      input.Name,
-		Email:     input.Email,
+		Name:      strings.TrimSpace(input.Name),
+		Email:     strings.TrimSpace(input.Email),
 		Activated: false,
 	}
 
@@ -33,7 +34,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-
+	// MAKE SURE USERNAME AND EMAIL PASSOWRD ARE MUST REQUIRED HERE
 	v := validator.New()
 
 	if data.ValidateUser(v, user); !v.Valid() {

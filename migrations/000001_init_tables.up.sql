@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS "comments" (
 "text" text NOT NULL,
 "created_by" bigint NOT NULL REFERENCES users ON DELETE CASCADE,
 "post_id" bigint NOT NULL REFERENCES posts ON DELETE CASCADE,
-"version" integer NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS "tokens" (

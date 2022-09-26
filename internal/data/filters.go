@@ -20,22 +20,27 @@ func (f Filters) sortParam() string {
 	for _, safeValue := range f.SortSafeList {
 		if f.Sort == safeValue {
 			switch {
-			case f.Sort == "-likesCount":
+			case f.Sort == "-likescount":
 				sortParam = "ARRAY_LENGTH(liked_by, 1)"
+				return sortParam
 			default:
 				sortParam = strings.TrimPrefix(f.Sort, "-")
+				return sortParam
 			}
-			return sortParam
 		}
 	}
 	panic("unsafe sort parameter: " + f.Sort)
 }
 
 func (f Filters) sortDirection() string {
-	if strings.HasPrefix(f.Sort, "-") {
+	switch {
+	case f.Sort == "-likescount":
+		return "DESC NULLS LAST"
+	case strings.HasPrefix(f.Sort, "-"):
 		return "DESC"
+	default:
+		return "ASC"
 	}
-	return "ASC"
 }
 
 func (f Filters) limit() int {

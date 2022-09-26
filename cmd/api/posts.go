@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/AthfanFasee/blog-post-backend/internal/data"
 	"github.com/AthfanFasee/blog-post-backend/internal/validator"
@@ -90,14 +91,16 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	user := app.contextGetUser(r)
+
 	post := &data.Post{
-		Title:     input.Title,
-		PostText:  input.PostText,
+		Title:     strings.TrimSpace(input.Title),
+		PostText:  strings.TrimSpace(input.PostText),
 		Img:       input.Img,
 		ReadTime:  input.ReadTime,
-		CreatedBy: 1,
+		CreatedBy: user.ID,
 	}
-	// Initialize a new Validator
+
 	v := validator.New()
 
 	if data.ValidatePost(v, post); !v.Valid() {
@@ -156,10 +159,10 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 
 	// Copy values from req body to appropriate fields of post record
 	if input.Title != nil {
-		post.Title = *input.Title
+		post.Title = strings.TrimSpace(*input.Title)
 	}
 	if input.PostText != nil {
-		post.PostText = *input.PostText
+		post.PostText = strings.TrimSpace(*input.PostText)
 	}
 	if input.Img != nil {
 		post.Img = *input.Img

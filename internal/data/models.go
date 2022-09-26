@@ -11,6 +11,7 @@ var (
 )
 
 type Models struct {
+	Comments CommentModel
 	Posts  PostModel
 	Tokens TokenModel
 	Users  UserModel
@@ -18,6 +19,7 @@ type Models struct {
 
 func NewModels(db *sql.DB) Models {
 	return Models{
+		Comments: CommentModel{DB: db},
 		Posts:  PostModel{DB: db},
 		Tokens: TokenModel{DB: db},
 		Users:  UserModel{DB: db},

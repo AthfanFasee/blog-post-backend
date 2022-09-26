@@ -184,12 +184,7 @@ func (p PostModel) Delete(id int64) error {
 
 	result, err := p.DB.ExecContext(ctx, query, id)
 	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return ErrEditConflict
-		default:
-			return err
-		}
+		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -198,7 +193,7 @@ func (p PostModel) Delete(id int64) error {
 	}
 
 	if rowsAffected == 0 {
-		return ErrEditConflict
+		return  ErrRecordNotFound
 	}
 
 	return nil
