@@ -5,24 +5,26 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/AthfanFasee/blog-post-backend/internal/dto"
 	"github.com/AthfanFasee/blog-post-backend/internal/validator"
 )
 
 type Comment struct {
-	ID        int64     `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	Text      string    `json:"text"`
-	CreatedBy int64     `json:"createdBy"`
-	PostID   int64     `json:"post"`
+	ID        int64
+	CreatedAt time.Time
+	Text      string
+	CreatedBy int64
+	PostID   int64
 }
 
 type CommentModel struct {
 	DB *sql.DB 
 }
 
-func (c CommentModel) GetAllForPost(postID int64) ([]*Comment,  error) {
-	query := `SELECT id, text, created_by, post_id, created_at
-	FROM comments 
+func (c CommentModel) GetAllForPost(postID int64) ([]*dto.CommentResponseBody,  error) {
+	query := `SELECT c.id, c.text, c.created_by, c.post_id, u.name
+	FROM comments c
+	INNER JOIN users u ON c.created_by = u.id
 	WHERE post_id = $1
 	ORDER BY id DESC`
 
@@ -36,10 +38,11 @@ func (c CommentModel) GetAllForPost(postID int64) ([]*Comment,  error) {
 
 	defer rows.Close()
 
-	comments := []*Comment{}
+	comments := []*dto.CommentResponseBody{}
 
 	for rows.Next() {
 		var comment Comment
+		var userName string
 
 		err := rows.Scan(
 			&comment.ID,
@@ -47,13 +50,22 @@ func (c CommentModel) GetAllForPost(postID int64) ([]*Comment,  error) {
 			&comment.CreatedBy,
 			&comment.PostID,
 			&comment.CreatedAt,
+			&userName,
 		)
 
 		if err != nil {
 			return nil, err
 		}
 
-		comments = append(comments, &comment)
+		CommentResponseBody := dto.CommentResponseBody{
+			ID: comment.ID,
+			Text: comment.Text,
+			CreatedBy: comment.CreatedBy,
+			PostID: comment.PostID,
+			UserName: userName,
+		}
+
+		comments = append(comments, &CommentResponseBody)
 	}
 
 	if err = rows.Err(); err != nil {
@@ -67,14 +79,14 @@ func (c *CommentModel) Insert(comment *Comment) error {
 	query := `
 	INSERT INTO comments (text, post_id, created_by)
 	VALUES ($1, $2, $3)
-	RETURNING id, created_at`
+	RETURNING id`
 
 	args := []interface{}{comment.Text, comment.PostID, comment.CreatedBy}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	return c.DB.QueryRowContext(ctx, query, args...).Scan(&comment.ID, &comment.CreatedAt)
+	return c.DB.QueryRowContext(ctx, query, args...).Scan(&comment.ID)
 }
 
 func (c *CommentModel) Delete(id int64) error {

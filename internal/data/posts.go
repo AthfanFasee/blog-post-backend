@@ -7,31 +7,34 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/AthfanFasee/blog-post-backend/internal/dto"
 	"github.com/AthfanFasee/blog-post-backend/internal/validator"
 	"github.com/lib/pq"
 )
 
 // Later change this struct and validator for Post
 type Post struct {
-	ID        int64     `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	Title     string    `json:"title"`
-	PostText  string    `json:"postText"`
-	Img       string    `json:"img"`
-	ReadTime  ReadTime  `json:"readTime"` // If we use our custom Runtime type here (which has the underlying type int32) go will use Runtime type's method MarshalJSON to encode this to JSON and it will be encoded to Runtime type (a string in the format "<runtime> mins") instead of int
-	LikedBy   []int64    `json:"likedBy"`
-	CreatedBy int64     `json:"createdBy"`
-	Version   int32     `json:"-"`
+	ID        int64
+	CreatedAt time.Time
+	Title     string
+	PostText  string
+	Img       string
+	ReadTime  dto.ReadTime
+	LikedBy   []int64
+	CreatedBy int64
+	Version   int32
 }
 
 type PostModel struct {
 	DB *sql.DB
 }
 
-func (p PostModel) GetAll(title string, filters Filters) ([]*Post, Metadata, error) {
+func (p PostModel) GetAll(title string, filters Filters) ([]*dto.PostResponseBody, Metadata, error) {
+	// Get post data along with name of the user who created it
 	query := fmt.Sprintf(`
-	SELECT count(*) OVER(), id, title, post_text, img, read_time, liked_by, created_by, created_at
-	FROM posts
+	SELECT count(*) OVER(), p.id, p.title, p.post_text, p.img, p.read_time, p.liked_by, p.created_by, p.created_at, u.name
+	FROM posts p
+	INNER JOIN users u ON p.created_by = u.id
 	WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 	AND (created_by = $2 OR $2 = 0)
 	ORDER BY %s %s, id %s
@@ -50,11 +53,11 @@ func (p PostModel) GetAll(title string, filters Filters) ([]*Post, Metadata, err
 	defer rows.Close()
 
 	totalRecords := 0
-	posts := []*Post{}
+	posts := []*dto.PostResponseBody{}
 
 	for rows.Next() {
 		var post Post
-
+		var userName string
 		err := rows.Scan(
 			&totalRecords,
 			&post.ID,
@@ -65,12 +68,25 @@ func (p PostModel) GetAll(title string, filters Filters) ([]*Post, Metadata, err
 			pq.Array(&post.LikedBy),
 			&post.CreatedBy,
 			&post.CreatedAt,
+			&userName,
 		)
 		if err != nil {
 			return nil, Metadata{}, err
 		}
 
-		posts = append(posts, &post)
+		PostResponseBody := dto.PostResponseBody{
+			ID:        post.ID,
+			Title:     post.Title,
+			PostText:  post.PostText,
+			Img:       post.Img,
+			ReadTime:  post.ReadTime,
+			LikedBy: post.LikedBy,
+			CreatedAt: post.CreatedAt,
+			CreatedBy: post.CreatedBy,
+			UserName: 	userName,
+		}
+
+		posts = append(posts, &PostResponseBody)
 	}
 
 	if err = rows.Err(); err != nil {
@@ -121,6 +137,47 @@ func (p PostModel) Get(id int64) (*Post, error) {
 	return &post, nil
 }
 
+func (p PostModel) GetWithUserName(id int64) (*Post, *string, error) {
+	if id < 1 {
+		return nil, nil, ErrRecordNotFound
+	}
+
+	query := `
+	SELECT p.id, p.title, p.post_text, p.img, p.read_time, p.liked_by, p.created_by, p.created_at, u.name
+	FROM posts p
+	INNER JOIN users u ON p.created_by = u.id
+	WHERE p.id = $1`
+
+	var post Post
+	var userName string
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := p.DB.QueryRowContext(ctx, query, id).Scan(
+		&post.ID,
+		&post.Title,
+		&post.PostText,
+		&post.Img,
+		&post.ReadTime,
+		pq.Array(&post.LikedBy),
+		&post.CreatedBy,
+		&post.CreatedAt,
+		&userName,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, nil, ErrRecordNotFound
+		default:
+			return nil, nil, err
+		}
+	}
+
+	return &post, &userName, nil
+}
+
 func (p PostModel) Insert(post *Post) error {
 	query := `
 		INSERT INTO posts (title, post_text, img, read_time, created_by) 
@@ -137,7 +194,7 @@ func (p PostModel) Insert(post *Post) error {
 
 func (p PostModel) Update(post *Post) error {
 	query := `
-	UPDATE posts 
+	UPDATE posts
 	SET title = $1, post_text = $2, img = $3, read_time = $4, version = version + 1
 	WHERE id = $5 AND version = $6`
 

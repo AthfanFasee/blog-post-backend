@@ -7,15 +7,12 @@ import (
 	"time"
 
 	"github.com/AthfanFasee/blog-post-backend/internal/data"
+	"github.com/AthfanFasee/blog-post-backend/internal/dto"
 	"github.com/AthfanFasee/blog-post-backend/internal/validator"
 )
 
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var input dto.RegisterUserRequestBody
 
 	err := app.readJSON(w, r, &input)
 	if err != nil {
@@ -73,7 +70,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 	})
 
-	err = app.writeJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
+	err = app.writeJSON(w, http.StatusAccepted, envelope{"message": "user created succesfully"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -128,7 +125,7 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"user": user}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "user activated succesfully"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

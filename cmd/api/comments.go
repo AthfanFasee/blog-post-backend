@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/AthfanFasee/blog-post-backend/internal/data"
+	"github.com/AthfanFasee/blog-post-backend/internal/dto"
 	"github.com/AthfanFasee/blog-post-backend/internal/validator"
 )
 
@@ -29,10 +30,7 @@ func (app *application) showCommentsForPostHandler(w http.ResponseWriter, r *htt
 }
 
 func (app *application) createCommentHandler(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Text      string    `json:"text"`
-		PostID   int64     `json:"post"`
-	}
+	var input dto.CommentRequestBody
 
 	// Decoding JSON values in to input struct
 	err := app.readJSON(w, r, &input)
@@ -62,7 +60,15 @@ func (app *application) createCommentHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"comment": comment}, nil)
+	CommentResponseBody := dto.CommentResponseBody{
+		ID: comment.ID,
+		Text: comment.Text,
+		CreatedBy: comment.CreatedBy,
+		PostID: comment.PostID,
+		UserName: user.Name,
+	}
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"comment": CommentResponseBody}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return

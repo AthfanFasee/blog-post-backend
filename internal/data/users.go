@@ -18,13 +18,13 @@ var (
 var AnonymousUser = &User{}
 
 type User struct {
-	ID        int64     `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Password  password  `json:"-"`
-	Activated bool      `json:"activated"`
-	Version   int       `json:"-"`
+	ID        int64
+	CreatedAt time.Time
+	Name      string
+	Email     string
+	Password  password
+	Activated bool
+	Version   int
 }
 
 func (u *User) IsAnonymous() bool {
@@ -217,7 +217,7 @@ func ValidatePasswordPlaintext(v *validator.Validator, password string) {
 
 func ValidateUser(v *validator.Validator, user *User) {
 	v.Check(user.Name != "", "name", "must be provided")
-	v.Check(len(user.Name) <= 500, "name", "must not be more than 500 bytes long")
+	v.Check(len(user.Name) <= 100, "name", "must not be more than 100 bytes long")
 
 	ValidateEmail(v, user.Email)
 

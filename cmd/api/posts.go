@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/AthfanFasee/blog-post-backend/internal/data"
+	"github.com/AthfanFasee/blog-post-backend/internal/dto"
 	"github.com/AthfanFasee/blog-post-backend/internal/validator"
 )
 
@@ -51,14 +52,13 @@ func (app *application) showPostsHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) showSinglePostHandler(w http.ResponseWriter, r *http.Request) {
-
 	id, err := app.readIDParam(r)
 	if err != nil {
 		app.notFoundResponse(w, r)
 		return
 	}
 
-	post, err := app.models.Posts.Get(id)
+	post, userName, err := app.models.Posts.GetWithUserName(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -69,20 +69,25 @@ func (app *application) showSinglePostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"post": post}, nil)
+	PostResponseBody := dto.PostResponseBody{
+		ID:        post.ID,
+		Title:     post.Title,
+		PostText:  post.PostText,
+		Img:       post.Img,
+		ReadTime:  post.ReadTime,
+		CreatedAt: post.CreatedAt,
+		CreatedBy: post.CreatedBy,
+		UserName: *userName,
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
 }
 
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Title     string        `json:"title"`
-		PostText  string        `json:"postText"`
-		ReadTime  data.ReadTime `json:"readTime"`
-		Img       string        `json:"img"`
-		CreatedBy int
-	}
+	var input dto.CreatePostRequestBody
 
 	// Decoding JSON values in to input struct
 	err := app.readJSON(w, r, &input)
@@ -118,7 +123,18 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 	headers := make(http.Header)
 	headers.Set("Location", fmt.Sprintf("api/v1/posts/%d", post.ID))
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"post": post}, headers)
+	PostResponseBody := dto.PostResponseBody{
+		ID:        post.ID,
+		Title:     post.Title,
+		PostText:  post.PostText,
+		Img:       post.Img,
+		ReadTime:  post.ReadTime,
+		CreatedAt: post.CreatedAt,
+		CreatedBy: user.ID,
+		UserName: user.Name,
+	}
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"post": PostResponseBody}, headers)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -142,13 +158,7 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Define the input struct in a way, all the field got zero value 'nil'
-	var input struct {
-		Title    *string        `json:"title"`
-		PostText *string        `json:"postText"`
-		Img      *string        `json:"img"`
-		ReadTime *data.ReadTime `json:"readTime"`
-	}
+	var input dto.UpdatePostRequestBody
 
 	// Decoding JSON values in to input struct
 	err = app.readJSON(w, r, &input)
@@ -197,7 +207,21 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"post": post}, nil)
+	user := app.contextGetUser(r)
+
+	PostResponseBody := dto.PostResponseBody{
+		ID:        post.ID,
+		Title:     post.Title,
+		PostText:  post.PostText,
+		Img:       post.Img,
+		ReadTime:  post.ReadTime,
+		LikedBy: post.LikedBy,
+		CreatedAt: post.CreatedAt,
+		CreatedBy: post.CreatedBy,
+		UserName: user.Name,
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -252,7 +276,19 @@ func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"post": post}, nil)
+	PostResponseBody := dto.PostResponseBody{
+		ID:        post.ID,
+		Title:     post.Title,
+		PostText:  post.PostText,
+		Img:       post.Img,
+		ReadTime:  post.ReadTime,
+		LikedBy: post.LikedBy,
+		CreatedAt: post.CreatedAt,
+		CreatedBy: post.CreatedBy,
+		UserName: user.Name,
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -284,7 +320,19 @@ func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"post": post}, nil)
+	PostResponseBody := dto.PostResponseBody{
+		ID:        post.ID,
+		Title:     post.Title,
+		PostText:  post.PostText,
+		Img:       post.Img,
+		ReadTime:  post.ReadTime,
+		LikedBy: post.LikedBy,
+		CreatedAt: post.CreatedAt,
+		CreatedBy: post.CreatedBy,
+		UserName: user.Name,
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
