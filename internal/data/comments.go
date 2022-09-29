@@ -49,7 +49,6 @@ func (c CommentModel) GetAllForPost(postID int64) ([]*dto.CommentResponseBody,  
 			&comment.Text,
 			&comment.CreatedBy,
 			&comment.PostID,
-			&comment.CreatedAt,
 			&userName,
 		)
 
@@ -115,9 +114,9 @@ func (c *CommentModel) Delete(id int64) error {
 }
 
 func ValidateComment(v *validator.Validator, comment *Comment) {
-	v.Check(comment.Text != "", "text", "must be provided")
-	v.Check(len(comment.Text) <= 200, "text", "can only contain 200 characters or less")
+	v.Check(comment.Text != "", "text", "Comment cannot be empty")
+	v.Check(len(comment.Text) <= 200, "text", "Comment can only contain 200 characters or less")
 
-	v.Check(comment.PostID != 0, "post", "must be provided")
-	v.Check(comment.PostID > 0, "post", "must be valid")
+	v.Check(comment.PostID != 0, "post", "Post id must be provided")
+	v.Check(comment.PostID > 0, "post", "Post id must be valid")
 }

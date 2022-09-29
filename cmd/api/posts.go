@@ -88,7 +88,6 @@ func (app *application) showSinglePostHandler(w http.ResponseWriter, r *http.Req
 
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
 	var input dto.CreatePostRequestBody
-
 	// Decoding JSON values in to input struct
 	err := app.readJSON(w, r, &input)
 	if err != nil {
@@ -257,7 +256,7 @@ func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Check if a post with provided id exists
-	post, err := app.models.Posts.Get(id)
+	post, userName, err := app.models.Posts.GetWithUserName(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -285,7 +284,7 @@ func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) 
 		LikedBy: post.LikedBy,
 		CreatedAt: post.CreatedAt,
 		CreatedBy: post.CreatedBy,
-		UserName: user.Name,
+		UserName: *userName,
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)
@@ -301,7 +300,7 @@ func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Check if a post with provided id exists
-	post, err := app.models.Posts.Get(id)
+	post, userName, err := app.models.Posts.GetWithUserName(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -329,7 +328,7 @@ func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Reques
 		LikedBy: post.LikedBy,
 		CreatedAt: post.CreatedAt,
 		CreatedBy: post.CreatedBy,
-		UserName: user.Name,
+		UserName: *userName,
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)

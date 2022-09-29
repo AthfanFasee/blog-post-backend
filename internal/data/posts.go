@@ -283,12 +283,12 @@ func (p PostModel) RemoveLike(post *Post, userID int64) error {
 }
 
 func ValidatePost(v *validator.Validator, post *Post) {
-	v.Check(post.Title != "", "title", "must be provided")
-	v.Check(len(post.Title) <= 100, "title", "can only contain 100 characters or less")
+	v.Check(post.Title != "", "title", "Title must be provided")
+	v.Check(len(post.Title) <= 100, "title", "Title can only contain 100 characters or less")
 
-	v.Check(post.PostText != "", "postText", "must be provided")
-	v.Check(post.Img != "", "img", "must be provided")
+	v.Check(post.PostText != "", "postText", "Text must be provided")
+	v.Check(post.Img != "", "img", "Image must be provided")
 
-	v.Check(post.ReadTime != 0, "readTime", "must be provided")
-	v.Check(post.ReadTime > 0, "readTime", "must be provided")
+	v.Check(post.ReadTime != 0, "readTime", "Read time must be provided")
+	v.Check(post.ReadTime > 0, "readTime", "Read time must be provided")
 }

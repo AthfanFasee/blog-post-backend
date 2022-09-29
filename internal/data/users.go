@@ -205,19 +205,19 @@ func (p *password) Matches(plainTextPassword string) (bool, error) {
 
 // Validation related
 func ValidateEmail(v *validator.Validator, email string) {
-	v.Check(email != "", "email", "must be provided")
+	v.Check(email != "", "email", "email must be provided")
 	v.Check(validator.Matches(email, validator.EmailRX), "email", "must be a valid email address")
 }
 
 func ValidatePasswordPlaintext(v *validator.Validator, password string) {
-	v.Check(password != "", "password", "must be provided")
-	v.Check(len(password) >= 6, "password", "must be at least 6 bytes long")
-	v.Check(len(password) <= 72, "password", "must not be more than 72 bytes long")
+	v.Check(password != "", "password", "password must be provided")
+	v.Check(len(password) >= 6, "password", "password must be at least 6 bytes long")
+	v.Check(len(password) <= 72, "password", "password must not be more than 72 bytes long")
 }
 
 func ValidateUser(v *validator.Validator, user *User) {
-	v.Check(user.Name != "", "name", "must be provided")
-	v.Check(len(user.Name) <= 100, "name", "must not be more than 100 bytes long")
+	v.Check(user.Name != "", "name", "name must be provided")
+	v.Check(len(user.Name) <= 100, "name", "name must not be more than 100 bytes long")
 
 	ValidateEmail(v, user.Email)
 

@@ -28,7 +28,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/api/v1/posts/dislike/:id", app.requireAuthenticatedUser(app.dislikePostHandler))
 
 	// Comment routes
-	router.HandlerFunc(http.MethodGet, "/api/v1/posts/comments/:id", app.requireAuthenticatedUser(app.showCommentsForPostHandler))
+	router.HandlerFunc(http.MethodGet, "/api/v1/posts/comments/:id", app.showCommentsForPostHandler)
 	router.HandlerFunc(http.MethodPost, "/api/v1/posts/comment", app.requireAuthenticatedUser(app.createCommentHandler))
 	router.HandlerFunc(http.MethodDelete, "/api/v1/posts/comment/:id", app.requireAuthenticatedUser(app.deleteCommentHandler))
 

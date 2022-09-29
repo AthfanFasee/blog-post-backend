@@ -52,12 +52,17 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		return
 	}
 
+	if !user.Activated {
+		app.inactiveAccountResponse(w, r)
+		return
+	}
+
 	token, err := app.models.Tokens.New(user.ID, 30*24*time.Hour, data.ScopeAuthentication)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-
+	
 	err = app.writeJSON(w, http.StatusCreated, envelope{"authentication_token": token, "userName": user.Name}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
