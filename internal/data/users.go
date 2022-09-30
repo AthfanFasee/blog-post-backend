@@ -22,7 +22,7 @@ type User struct {
 	CreatedAt time.Time
 	Name      string
 	Email     string
-	Password  password
+	Password  Password
 	Activated bool
 	Version   int
 }
@@ -31,7 +31,7 @@ func (u *User) IsAnonymous() bool {
 	return u == AnonymousUser
 }
 
-type password struct {
+type Password struct {
 	plainText *string
 	hash      []byte
 }
@@ -177,7 +177,7 @@ func (u UserModel) GetForToken(tokenScope, tokenPlainText string) (*User, error)
 }
 
 // Password related
-func (p *password) Set(plainTextPassword string) error {
+func (p *Password) Set(plainTextPassword string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(plainTextPassword), 12)
 	if err != nil {
 		return err
@@ -189,7 +189,7 @@ func (p *password) Set(plainTextPassword string) error {
 	return nil
 }
 
-func (p *password) Matches(plainTextPassword string) (bool, error) {
+func (p *Password) Matches(plainTextPassword string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword(p.hash, []byte(plainTextPassword))
 	if err != nil {
 		switch {

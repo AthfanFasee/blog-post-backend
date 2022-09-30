@@ -74,7 +74,7 @@ func (c CommentModel) GetAllForPost(postID int64) ([]*dto.CommentResponseBody,  
 	return comments, nil
 }
 
-func (c *CommentModel) Insert(comment *Comment) error {
+func (c CommentModel) Insert(comment *Comment) error {
 	query := `
 	INSERT INTO comments (text, post_id, created_by)
 	VALUES ($1, $2, $3)
@@ -88,7 +88,7 @@ func (c *CommentModel) Insert(comment *Comment) error {
 	return c.DB.QueryRowContext(ctx, query, args...).Scan(&comment.ID)
 }
 
-func (c *CommentModel) Delete(id int64) error {
+func (c CommentModel) Delete(id int64) error {
 	query := `
 	DELETE FROM comments
 	WHERE id = $1`

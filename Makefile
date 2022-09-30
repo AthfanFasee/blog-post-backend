@@ -81,7 +81,33 @@ build/api:
 	GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/api ./cmd/api
 
 
+# ==================================================================================== #
+# TEST
+# ==================================================================================== #
 
+.PHONY: test/api
+test/api:
+	@echo 'testing cmd/api...'
+	go test ./cmd/api/
+
+.PHONY: test/api/race
+test/api/race:
+	@echo 'testing with race detector cmd/api...'
+	go test -race ./cmd/api/
+
+
+# ==================================================================================== #
+# Windows
+# ==================================================================================== #
+.PHONY: db/up/win
+db/up/win:
+	@echo 'running db/migrate/up...'
+	migrate -path ./migrations -database ${DB_DSN} -verbose up
+
+.PHONY: db/down/win
+db/down/win:
+	@echo 'running db/migrate/down...'
+	migrate -path ./migrations -database ${DB_DSN} down
 
 # database:
 # 	migrate -path ./migrations -database "postgres://blogpost:secret@localhost:542/blogpost?sslmode=disable" -verbose up
