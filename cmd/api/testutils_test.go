@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/AthfanFasee/blog-post-backend/internal/data"
@@ -14,7 +13,7 @@ import (
 
 func newTestApplication(t *testing.T) *application {
 	return &application{
-		logger: jsonlog.New(os.Stdout, jsonlog.LevelInfo),
+		logger: jsonlog.New(io.Discard, jsonlog.LevelInfo),
 		models: data.NewMockModels(),
 	}
 }

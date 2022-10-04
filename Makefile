@@ -88,12 +88,12 @@ build/api:
 .PHONY: test/api
 test/api:
 	@echo 'testing cmd/api...'
-	go test ./cmd/api/
+	go test -v ./cmd/api/
 
 .PHONY: test/api/race
 test/api/race:
 	@echo 'testing with race detector cmd/api...'
-	go test -race ./cmd/api/
+	go test -v -race ./cmd/api/
 
 
 # ==================================================================================== #

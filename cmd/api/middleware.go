@@ -198,23 +198,30 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 }
 
 func (app *application) metrics(next http.Handler) http.Handler {
-	totalRequestsReceived := expvar.NewInt("total_requests_received")
-	totalResponsesSent := expvar.NewInt("total_responses_sent")
-	totalProcessingTimeMicroseconds := expvar.NewInt("total_processing_time_μs")
-	totalResponsesSentByStatus := expvar.NewMap("total_responses_sent_by_status")
+	// Enable metrics using config
+	if app.config.metrics {
+		totalRequestsReceived := expvar.NewInt("total_requests_received")
+		totalResponsesSent := expvar.NewInt("total_responses_sent")
+		totalProcessingTimeMicroseconds := expvar.NewInt("total_processing_time_μs")
+		totalResponsesSentByStatus := expvar.NewMap("total_responses_sent_by_status")
+
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			totalRequestsReceived.Add(1)
+
+			// httpsnoop.CaptureMetrics() Passes next handler in the chain along with the existing w and r to get metrics info
+			metrics := httpsnoop.CaptureMetrics(next, w, r)
+
+			totalResponsesSent.Add(1)
+
+			totalProcessingTimeMicroseconds.Add(metrics.Duration.Microseconds())
+
+			// Add one to the specific status code in our map
+			totalResponsesSentByStatus.Add(strconv.Itoa(metrics.Code), 1)
+		})
+	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		totalRequestsReceived.Add(1)
-
-		// httpsnoop.CaptureMetrics() Passes next handler in the chain along with the existing w and r to get metrics info
-		metrics := httpsnoop.CaptureMetrics(next, w, r)
-
-		totalResponsesSent.Add(1)
-
-		totalProcessingTimeMicroseconds.Add(metrics.Duration.Microseconds())
-
-		// Add one to the specific status code in our map
-		totalResponsesSentByStatus.Add(strconv.Itoa(metrics.Code), 1)
-	})
+		next.ServeHTTP(w, r)
+	})	
 }

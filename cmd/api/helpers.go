@@ -124,21 +124,10 @@ func (app *application) readString(queryString url.Values, key string, defaultVa
 	return stringValue
 }
 
-// Return a []string value from query string map or a default value
-func (app *application) readCSV(queryString url.Values, key string, defaultValue []string) []string {
-	csvValue := queryString.Get(key)
-
-	if csvValue == "" {
-		return defaultValue
-	}
-
-	return strings.Split(csvValue, ",")
-}
-
 // Return an int value from query string map or a default value
 func (app *application) readInt(queryString url.Values, key string, defaultValue int, v *validator.Validator) int {
 	stringValue := queryString.Get(key)
-
+	
 	if stringValue == "" {
 		return defaultValue
 	}

@@ -14,7 +14,6 @@ import (
 func (app *application) showPostsHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Title  string
-		Genres []string
 		data.Filters
 	}
 
@@ -25,7 +24,6 @@ func (app *application) showPostsHandler(w http.ResponseWriter, r *http.Request)
 
 	input.Filters.Sort = app.readString(queryString, "sort", "-id")
 	input.Title = app.readString(queryString, "title", "")
-	input.Genres = app.readCSV(queryString, "genres", []string{})
 	input.Filters.Page = app.readInt(queryString, "page", 1, v)
 	input.Filters.ID = app.readInt(queryString, "id", 0, v)
 	input.Filters.Limit = app.readInt(queryString, "limit", 6, v)
@@ -41,10 +39,15 @@ func (app *application) showPostsHandler(w http.ResponseWriter, r *http.Request)
 
 	posts, metadata, err := app.models.Posts.GetAll(input.Title, input.Filters)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
-
+	
 	err = app.writeJSON(w, http.StatusOK, envelope{"posts": posts, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

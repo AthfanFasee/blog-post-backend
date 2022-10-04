@@ -29,6 +29,7 @@ type PostModel struct {
 	DB *sql.DB
 }
 
+// FULL TEXT DOESNT WORK
 func (p PostModel) GetAll(title string, filters Filters) ([]*dto.PostResponseBody, Metadata, error) {
 	// Get post data along with name of the user who created it
 	query := fmt.Sprintf(`

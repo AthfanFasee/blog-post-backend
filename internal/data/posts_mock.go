@@ -37,13 +37,26 @@ var mockPostResponseBody = &dto.PostResponseBody{
 	UserName: "Mocked User",
 }
 
+var mockPostResponseBodyDifferentTitle = &dto.PostResponseBody{
+	ID:       mockPost.ID,
+	Title:      "Title",
+	PostText:      mockPost.PostText,
+	Img:      mockPost.Img,
+	ReadTime:      mockPost.ReadTime,
+	LikedBy: mockPost.LikedBy,
+	CreatedBy:   mockComment.CreatedBy,
+	UserName: "Mocked User",
+}
+
 type MockPostModel struct{}
 
 func (p MockPostModel) GetAll(title string, filters Filters) ([]*dto.PostResponseBody, Metadata, error) {
 	switch {
-	case title == "Mocked Post Title":
+	case title == "title":
+		return []*dto.PostResponseBody{mockPostResponseBodyDifferentTitle}, mockMetadata, nil
+	case title != "invalid" && filters.ID == 1:
 		return []*dto.PostResponseBody{mockPostResponseBody}, mockMetadata, nil
-	case filters.ID == 1:
+	case title == "":
 		return []*dto.PostResponseBody{mockPostResponseBody}, mockMetadata, nil
 	default:
 		return nil, Metadata{}, ErrRecordNotFound
