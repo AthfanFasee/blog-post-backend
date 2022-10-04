@@ -21,7 +21,7 @@ func (v *Validator) Valid() bool {
 	return len(v.Errors) == 0
 }
 
-//  Add an error message to the map as long as no entry already exists for the given key
+// Add an error message to the map as long as no entry already exists for the given key
 func (v *Validator) AddError(key string, message string) {
 	if _, exists := v.Errors[key]; !exists {
 		v.Errors[key] = message

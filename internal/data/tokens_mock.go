@@ -6,11 +6,11 @@ import (
 )
 
 var mockToken = &Token{
-	Plaintext :       "Mocked text",
-	Hash: 	[]byte("Mocked Hash"),
-	Expiry    :      time.Now().Add(5 * time.Hour),
-	UserID    : 1,
-	Scope:   ScopeActivation,
+	Plaintext: "Mocked text",
+	Hash:      []byte("Mocked Hash"),
+	Expiry:    time.Now().Add(5 * time.Hour),
+	UserID:    1,
+	Scope:     ScopeActivation,
 }
 
 type MockTokenModel struct{}

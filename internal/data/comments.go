@@ -14,14 +14,14 @@ type Comment struct {
 	CreatedAt time.Time
 	Text      string
 	CreatedBy int64
-	PostID   int64
+	PostID    int64
 }
 
 type CommentModel struct {
-	DB *sql.DB 
+	DB *sql.DB
 }
 
-func (c CommentModel) GetAllForPost(postID int64) ([]*dto.CommentResponseBody,  error) {
+func (c CommentModel) GetAllForPost(postID int64) ([]*dto.CommentResponseBody, error) {
 	query := `SELECT c.id, c.text, c.created_by, c.post_id, u.name
 	FROM comments c
 	INNER JOIN users u ON c.created_by = u.id
@@ -57,11 +57,11 @@ func (c CommentModel) GetAllForPost(postID int64) ([]*dto.CommentResponseBody,  
 		}
 
 		CommentResponseBody := dto.CommentResponseBody{
-			ID: comment.ID,
-			Text: comment.Text,
+			ID:        comment.ID,
+			Text:      comment.Text,
 			CreatedBy: comment.CreatedBy,
-			PostID: comment.PostID,
-			UserName: userName,
+			PostID:    comment.PostID,
+			UserName:  userName,
 		}
 
 		comments = append(comments, &CommentResponseBody)
@@ -107,7 +107,7 @@ func (c CommentModel) Delete(id int64) error {
 	}
 
 	if rowsAffected == 0 {
-		return  ErrRecordNotFound
+		return ErrRecordNotFound
 	}
 
 	return nil

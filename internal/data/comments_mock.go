@@ -7,23 +7,23 @@ import (
 )
 
 var mockComment = &Comment{
-	ID:       1,
+	ID:        1,
 	CreatedAt: time.Now(),
 	Text:      "Mocked Comment",
 	CreatedBy: 1,
-	PostID:   1,
+	PostID:    1,
 }
 
 var mockCommentResponseBody = &dto.CommentResponseBody{
-	ID:       mockComment.ID,
+	ID:        mockComment.ID,
 	Text:      mockComment.Text,
 	CreatedBy: mockComment.CreatedBy,
-	PostID:   1,
+	PostID:    1,
 }
 
 type MockCommentModel struct{}
 
-func (c MockCommentModel) GetAllForPost(postID int64) ([]*dto.CommentResponseBody,  error) {
+func (c MockCommentModel) GetAllForPost(postID int64) ([]*dto.CommentResponseBody, error) {
 	switch postID {
 	case 1:
 		return []*dto.CommentResponseBody{mockCommentResponseBody}, nil

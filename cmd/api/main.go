@@ -15,20 +15,21 @@ import (
 	"github.com/AthfanFasee/blog-post-backend/internal/data"
 	"github.com/AthfanFasee/blog-post-backend/internal/jsonlog"
 	"github.com/AthfanFasee/blog-post-backend/internal/mailer"
+	"github.com/AthfanFasee/blog-post-backend/util"
 	_ "github.com/lib/pq"
 )
 
 var (
-	version string
+	version   string
 	buildTime string
 )
 
 // Configuration settings
 type config struct {
-	port int
-	env  string
+	port    int
+	env     string
 	metrics bool
-	db   struct {
+	db      struct {
 		dsn          string
 		maxOpenConns int
 		maxIdleConns int
@@ -63,13 +64,27 @@ type application struct {
 func main() {
 	var cfg config
 
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
+
+	// Set up configs from env file
+	env, err := util.LoadEnv()
+	if err != nil {
+		logger.PrintFatal(err, nil)
+	}
+
+	cfg.port = env.ServerPort
+	cfg.db.dsn = env.DSN
+	cfg.smtp.host = env.SmtpHost
+	cfg.smtp.password = env.SmtpPassword
+	cfg.smtp.username = env.SmtpUsername
+	cfg.smtp.port = env.SmtpPort
+	cfg.smtp.sender = env.SmtpSender
+
 	// Read values into cfg struct from command-line flags
 	// Server Related
-	flag.IntVar(&cfg.port, "port", 3001, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.BoolVar(&cfg.metrics, "metrics", false, "Enable metrics")
 	// Databse Related
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://blogpost:secret@localhost:542/blogpost?sslmode=disable", "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")
@@ -77,12 +92,6 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
-	// Mailer Related
-	flag.StringVar(&cfg.smtp.host, "smtp-host", "smtp.mailtrap.io", "SMTP host")
-	flag.IntVar(&cfg.smtp.port, "smtp-port", 25, "SMTP port")
-	flag.StringVar(&cfg.smtp.username, "smtp-username", "01542a286b7551", "SMTP username")
-	flag.StringVar(&cfg.smtp.password, "smtp-password", "5d28364237258a", "SMTP password")
-	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "aththaar47@gmail.com", "SMTP sender")
 	// Cors related
 	flag.Func("cors-trusted-origins", "Trusted CORS origins(separated by space)", func(val string) error {
 		cfg.cors.trustedOrigins = strings.Fields(val)
@@ -99,8 +108,6 @@ func main() {
 		fmt.Printf("Build time:\t%s\n", buildTime)
 		os.Exit(0)
 	}
-
-	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
 	// LETS try and change this to cfg.db.dsn later
 	db, err := openDB(cfg)

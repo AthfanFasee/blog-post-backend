@@ -42,13 +42,13 @@ func (app *application) createCommentHandler(w http.ResponseWriter, r *http.Requ
 	user := app.contextGetUser(r)
 
 	comment := &data.Comment{
-		Text: strings.TrimSpace(input.Text),
-		PostID: input.PostID,
+		Text:      strings.TrimSpace(input.Text),
+		PostID:    input.PostID,
 		CreatedBy: user.ID,
 	}
 
 	v := validator.New()
-	
+
 	if data.ValidateComment(v, comment); !v.Valid() {
 		app.validationFailedResponse(w, r, v.Errors)
 		return
@@ -61,11 +61,11 @@ func (app *application) createCommentHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	CommentResponseBody := dto.CommentResponseBody{
-		ID: comment.ID,
-		Text: comment.Text,
+		ID:        comment.ID,
+		Text:      comment.Text,
 		CreatedBy: comment.CreatedBy,
-		PostID: comment.PostID,
-		UserName: user.Name,
+		PostID:    comment.PostID,
+		UserName:  user.Name,
 	}
 
 	err = app.writeJSON(w, http.StatusCreated, envelope{"comment": CommentResponseBody}, nil)

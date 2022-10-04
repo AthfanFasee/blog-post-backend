@@ -1,5 +1,5 @@
 # Some Makefile commands may have problems in Windows OS.
-include .envrc
+include app.env
 
 # ==================================================================================== #
 # HELPERS

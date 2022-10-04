@@ -81,10 +81,10 @@ func (p PostModel) GetAll(title string, filters Filters) ([]*dto.PostResponseBod
 			PostText:  post.PostText,
 			Img:       post.Img,
 			ReadTime:  post.ReadTime,
-			LikedBy: post.LikedBy,
+			LikedBy:   post.LikedBy,
 			CreatedAt: post.CreatedAt,
 			CreatedBy: post.CreatedBy,
-			UserName: 	userName,
+			UserName:  userName,
 		}
 
 		posts = append(posts, &PostResponseBody)
@@ -251,7 +251,7 @@ func (p PostModel) Delete(id int64) error {
 	}
 
 	if rowsAffected == 0 {
-		return  ErrRecordNotFound
+		return ErrRecordNotFound
 	}
 
 	return nil
@@ -259,7 +259,7 @@ func (p PostModel) Delete(id int64) error {
 
 func (p PostModel) AddLike(post *Post, userID int64) error {
 	// This SQL statement will prevent a user from liking a post twice
-	query :=`
+	query := `
 	UPDATE posts SET 
 	liked_by = (select array_agg(distinct x) from unnest(array_append(liked_by, $1)) t(x))
 	WHERE id = $2
@@ -272,7 +272,7 @@ func (p PostModel) AddLike(post *Post, userID int64) error {
 }
 
 func (p PostModel) RemoveLike(post *Post, userID int64) error {
-	query :=`
+	query := `
 	UPDATE posts SET liked_by = array_remove(liked_by, $1)
 	WHERE id = $2
 	RETURNING liked_by`

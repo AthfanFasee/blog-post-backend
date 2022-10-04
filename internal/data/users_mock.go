@@ -5,13 +5,13 @@ import (
 )
 
 var mockUser = &User{
-	ID:       1,
+	ID:        1,
 	CreatedAt: time.Now(),
 	Name:      "Mocked Name",
-	Email:      "Mocked Email",
-	Password: Password{},
-	Activated:   true,
-	Version: 1,
+	Email:     "Mocked Email",
+	Password:  Password{},
+	Activated: true,
+	Version:   1,
 }
 
 type MockUserModel struct{}

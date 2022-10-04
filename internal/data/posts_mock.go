@@ -7,45 +7,45 @@ import (
 )
 
 var mockPost = Post{
-	ID:       1,
+	ID:        1,
 	CreatedAt: time.Now(),
-	Title:      "Mocked Post Title",
-	PostText:    "Mocked Post PostText",
-	Img:      	"Mocked Post Img",
-	ReadTime: 1,
+	Title:     "Mocked Post Title",
+	PostText:  "Mocked Post PostText",
+	Img:       "Mocked Post Img",
+	ReadTime:  1,
 	LikedBy:   []int64{1, 2},
 	CreatedBy: 1,
-	Version: 1,
+	Version:   1,
 }
 
 var mockMetadata = Metadata{
-	CurrentPage: 1,
-    PageSize: 1,
-    FirstPage: 1,
-    LastPage: 1,
-    TotalRecords: 1,
+	CurrentPage:  1,
+	PageSize:     1,
+	FirstPage:    1,
+	LastPage:     1,
+	TotalRecords: 1,
 }
 
 var mockPostResponseBody = &dto.PostResponseBody{
-	ID:       mockPost.ID,
-	Title:      mockPost.Title,
-	PostText:      mockPost.PostText,
-	Img:      mockPost.Img,
-	ReadTime:      mockPost.ReadTime,
-	LikedBy: mockPost.LikedBy,
-	CreatedBy:   mockComment.CreatedBy,
-	UserName: "Mocked User",
+	ID:        mockPost.ID,
+	Title:     mockPost.Title,
+	PostText:  mockPost.PostText,
+	Img:       mockPost.Img,
+	ReadTime:  mockPost.ReadTime,
+	LikedBy:   mockPost.LikedBy,
+	CreatedBy: mockComment.CreatedBy,
+	UserName:  "Mocked User",
 }
 
 var mockPostResponseBodyDifferentTitle = &dto.PostResponseBody{
-	ID:       mockPost.ID,
-	Title:      "Title",
-	PostText:      mockPost.PostText,
-	Img:      mockPost.Img,
-	ReadTime:      mockPost.ReadTime,
-	LikedBy: mockPost.LikedBy,
-	CreatedBy:   mockComment.CreatedBy,
-	UserName: "Mocked User",
+	ID:        mockPost.ID,
+	Title:     "Title",
+	PostText:  mockPost.PostText,
+	Img:       mockPost.Img,
+	ReadTime:  mockPost.ReadTime,
+	LikedBy:   mockPost.LikedBy,
+	CreatedBy: mockComment.CreatedBy,
+	UserName:  "Mocked User",
 }
 
 type MockPostModel struct{}

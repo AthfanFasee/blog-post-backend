@@ -15,9 +15,9 @@ func TestHealthCheckHandler(t *testing.T) {
 	code, _, body := ts.get(t, "/api/v1/healthcheck")
 
 	assert.Equal(t, code, 200)
-	
+
 	if body != "" {
 		assert.StringContains(t, body, "available")
 	}
-	
+
 }

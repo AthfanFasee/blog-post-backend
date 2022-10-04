@@ -13,7 +13,7 @@ import (
 
 func (app *application) showPostsHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Title  string
+		Title string
 		data.Filters
 	}
 
@@ -47,7 +47,7 @@ func (app *application) showPostsHandler(w http.ResponseWriter, r *http.Request)
 		}
 		return
 	}
-	
+
 	err = app.writeJSON(w, http.StatusOK, envelope{"posts": posts, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -80,7 +80,7 @@ func (app *application) showSinglePostHandler(w http.ResponseWriter, r *http.Req
 		ReadTime:  post.ReadTime,
 		CreatedAt: post.CreatedAt,
 		CreatedBy: post.CreatedBy,
-		UserName: *userName,
+		UserName:  *userName,
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)
@@ -133,7 +133,7 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		ReadTime:  post.ReadTime,
 		CreatedAt: post.CreatedAt,
 		CreatedBy: user.ID,
-		UserName: user.Name,
+		UserName:  user.Name,
 	}
 
 	err = app.writeJSON(w, http.StatusCreated, envelope{"post": PostResponseBody}, headers)
@@ -217,10 +217,10 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 		PostText:  post.PostText,
 		Img:       post.Img,
 		ReadTime:  post.ReadTime,
-		LikedBy: post.LikedBy,
+		LikedBy:   post.LikedBy,
 		CreatedAt: post.CreatedAt,
 		CreatedBy: post.CreatedBy,
-		UserName: user.Name,
+		UserName:  user.Name,
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)
@@ -271,7 +271,7 @@ func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	// LATER DONT PASS USERID from FRONTEND
 	user := app.contextGetUser(r)
-	
+
 	err = app.models.Posts.AddLike(post, user.ID)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
@@ -284,10 +284,10 @@ func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) 
 		PostText:  post.PostText,
 		Img:       post.Img,
 		ReadTime:  post.ReadTime,
-		LikedBy: post.LikedBy,
+		LikedBy:   post.LikedBy,
 		CreatedAt: post.CreatedAt,
 		CreatedBy: post.CreatedBy,
-		UserName: *userName,
+		UserName:  *userName,
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)
@@ -315,7 +315,7 @@ func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Reques
 	}
 	// LATER DONT PASS USERID from FRONTEND
 	user := app.contextGetUser(r)
-	
+
 	err = app.models.Posts.RemoveLike(post, user.ID)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
@@ -328,10 +328,10 @@ func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Reques
 		PostText:  post.PostText,
 		Img:       post.Img,
 		ReadTime:  post.ReadTime,
-		LikedBy: post.LikedBy,
+		LikedBy:   post.LikedBy,
 		CreatedAt: post.CreatedAt,
 		CreatedBy: post.CreatedBy,
-		UserName: *userName,
+		UserName:  *userName,
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)

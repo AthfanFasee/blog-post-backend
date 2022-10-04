@@ -127,7 +127,7 @@ func (app *application) readString(queryString url.Values, key string, defaultVa
 // Return an int value from query string map or a default value
 func (app *application) readInt(queryString url.Values, key string, defaultValue int, v *validator.Validator) int {
 	stringValue := queryString.Get(key)
-	
+
 	if stringValue == "" {
 		return defaultValue
 	}

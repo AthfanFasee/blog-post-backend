@@ -45,17 +45,17 @@ type Models struct {
 func NewModels(db *sql.DB) Models {
 	return Models{
 		Comments: CommentModel{DB: db},
-		Posts:  PostModel{DB: db},
-		Tokens: TokenModel{DB: db},
-		Users:  UserModel{DB: db},
+		Posts:    PostModel{DB: db},
+		Tokens:   TokenModel{DB: db},
+		Users:    UserModel{DB: db},
 	}
 }
 
 func NewMockModels() Models {
 	return Models{
 		Comments: MockCommentModel{},
-		Posts:  MockPostModel{},
-		Tokens: MockTokenModel{},
-		Users:  MockUserModel{},
+		Posts:    MockPostModel{},
+		Tokens:   MockTokenModel{},
+		Users:    MockUserModel{},
 	}
 }
