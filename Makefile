@@ -57,13 +57,11 @@ audit:
 	go test -race -vet=off ./...
 
 ## vendor: tidy and vendor dependencies
-.PHONY: vendor
-vendor:
+.PHONY: verify
+verify:
 	@echo 'Tidying and verifying module dependencies...'
 	go mod tidy
 	go mod verify
-	@echo 'Vendoring dependencies...'
-	go mod vendor
 
 # ==================================================================================== #
 # BUILD
@@ -79,6 +77,12 @@ build/api:
 	@echo 'Building cmd/api...'
 	go build -ldflags=${linker_flags} -o=./bin/api ./cmd/api
 	GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/api ./cmd/api
+
+## build/dockerImage: build dockerImage
+.PHONY: build/docker
+build/docker:
+	@echo 'Building docker image'
+	docker build --build-arg TIME=$(date +'%y-%m-%d') -t blogpost:latest .
 
 
 # ==================================================================================== #
