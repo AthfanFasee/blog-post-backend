@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS "comments" (
 "created_at" timestamp(0) with time zone NOT NULL DEFAULT NOW(),
 "text" text NOT NULL,
 "created_by" bigint NOT NULL REFERENCES users ON DELETE CASCADE,
-"post_id" bigint NOT NULL REFERENCES posts ON DELETE CASCADE,
+"post_id" bigint NOT NULL REFERENCES posts ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "tokens" (

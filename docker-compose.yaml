@@ -1,0 +1,26 @@
+version: "3.9"
+services:
+ postgres:
+  build:
+   context: .
+   dockerfile: db.dockerfile
+  environment:
+   - POSTGRES_USER=root
+   - POSTGRES_PASSWORD=secret
+   - POSTGRES_DB=blogpost
+  ports:
+    - "542:5432"
+ api:
+  build:
+    context: .
+    dockerfile: app.dockerfile
+    args:
+    - VERSION=git describe --always --dirty --tags --long
+  ports:
+   - "3001:3001"
+  environment:
+   - DB_DSN=postgres://root:secret@postgres:5432/blogpost?sslmode=disable
+  depends_on:
+   - postgres
+  entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh" ]
+  command: [ "/app/main" ]
