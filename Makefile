@@ -78,18 +78,11 @@ build/api:
 	go build -ldflags=${linker_flags} -o=./bin/api ./cmd/api
 	GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/api ./cmd/api
 
-## build/docker: build docker image
-.PHONY: build/docker
-build/docker:
-	@echo 'Building docker image'
-	docker build --build-arg TIME=$(date +'%y-%m-%d') -t blogpost:latest .
-
 ## dockercompose: run dockercompose
 .PHONY: dockercompose
 dockercompose:
 	@echo 'Running dockercompose'
-	export VERSION=${git_description}
-	docker compose up --build
+	./build.sh
 
 
 # ==================================================================================== #
