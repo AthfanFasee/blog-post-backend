@@ -4,13 +4,15 @@ WORKDIR /app
 COPY . .
 ARG VERSION
 ENV VERSION=$VERSION
-RUN GOOS=linux GOARCH=amd64 go build -ldflags='-s -X main.version=$VERSION' -o main ./cmd/api
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-s -X main.version=$VERSION" -o main ./cmd/api
 RUN apk add curl
 RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz
 
 # Run Stage
 FROM alpine:3.16
 WORKDIR /app
+ENV DB_DSN=postgres://root:secret@localhost:5432/blogpost?sslmode=disable
+RUN echo DB_DSN
 COPY --from=builder /app/main .
 COPY --from=builder /app/migrate ./migrate
 COPY app.env .
