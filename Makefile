@@ -67,7 +67,7 @@ verify:
 # BUILD
 # ==================================================================================== #
 
-current_time = $(shell date --iso-8601=seconds)
+current_time = $(shell date +"%y-%m-%d")
 git_description = $(shell git describe --always --dirty --tags --long)
 linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_description}'
 
@@ -78,11 +78,18 @@ build/api:
 	go build -ldflags=${linker_flags} -o=./bin/api ./cmd/api
 	GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/api ./cmd/api
 
-## dockercompose: run dockercompose
-.PHONY: dockercompose
-dockercompose:
-	@echo 'Running dockercompose'
-	./build.sh
+## dockercompose: run dockercompose up
+.PHONY: dockerup
+dockerup:
+	@echo 'Running dockercompose up'
+	docker-compose build --build-arg VERSION=$(git describe --always --dirty --tags --long) --build-arg CURRENT_TIME=$(date +"%y-%m-%d")
+	docker compose up
+
+## dockercompose: run dockercompose down
+.PHONY: dockerdown
+dockerdown:
+	@echo 'Running dockercompose down'
+	docker compose down
 
 
 # ==================================================================================== #
