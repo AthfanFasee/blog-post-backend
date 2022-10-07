@@ -1,5 +1,6 @@
-# Some Makefile commands may have problems in Windows OS.
 include app.env
+SHELL := powershell.exe
+.SHELLFLAGS := -NoProfile -Command
 
 # ==================================================================================== #
 # HELPERS
@@ -14,6 +15,11 @@ help:
 .PHONY: confirm
 confirm:
 	@echo -n 'Are you sure? [y/N] ' && read ans && [ $${ans:-N} = y ]
+
+
+
+
+
 
 # ==================================================================================== #
 # DEVELOPMENT
@@ -41,6 +47,10 @@ db/migrations/up: confirm
 	@echo 'Running up migrations...'
 	migrate -path ./migrations -database ${DB_DSN} up
 
+
+
+
+
 # ==================================================================================== #
 # QUALITY CONTROL
 # ==================================================================================== #
@@ -63,13 +73,18 @@ verify:
 	go mod tidy
 	go mod verify
 
+
+
+
+
 # ==================================================================================== #
 # BUILD
 # ==================================================================================== #
 
-current_time = $(shell date +"%y-%m-%d")
+current_time = $(shell Get-Date -Format "MM/dd/yyyy:HH:mm")
 git_description = $(shell git describe --always --dirty --tags --long)
 linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_description}'
+
 
 ## build/api: build the cmd/api application
 .PHONY: build/api
@@ -82,7 +97,7 @@ build/api:
 .PHONY: dockerup
 dockerup:
 	@echo 'Running dockercompose up'
-	docker-compose build --build-arg VERSION=$(git describe --always --dirty --tags --long) --build-arg CURRENT_TIME=$(date +"%y-%m-%d")
+	docker-compose build --build-arg VERSION=${git_description} --build-arg CURRENT_TIME=${current_time}
 	docker compose up
 
 ## dockercompose: run dockercompose down
@@ -90,6 +105,8 @@ dockerup:
 dockerdown:
 	@echo 'Running dockercompose down'
 	docker compose down
+
+
 
 
 # ==================================================================================== #
@@ -105,6 +122,8 @@ test/api:
 test/api/race:
 	@echo 'testing with race detector cmd/api...'
 	go test -v -race ./cmd/api/
+
+
 
 
 # ==================================================================================== #

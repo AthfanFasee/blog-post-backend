@@ -80,7 +80,6 @@ func main() {
 	cfg.smtp.port = env.SmtpPort
 	cfg.smtp.sender = env.SmtpSender
 
-	// Read values into cfg struct from command-line flags
 	// Server Related
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.BoolVar(&cfg.metrics, "metrics", false, "Enable metrics")

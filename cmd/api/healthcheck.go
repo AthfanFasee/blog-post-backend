@@ -5,7 +5,6 @@ import (
 )
 
 func (app *application) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	// %q will automatically wrap the variables in "". %s cannot do this
 	serverData := envelope{
 		"status": "available",
 		"systemInfo": map[string]string{
