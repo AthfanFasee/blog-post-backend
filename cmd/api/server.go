@@ -17,7 +17,7 @@ func (app *application) serve() error {
 		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		WriteTimeout: 20 * time.Second,
 	}
 
 	// Gracefully handle quit signals

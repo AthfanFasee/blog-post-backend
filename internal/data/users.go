@@ -24,7 +24,7 @@ type User struct {
 	Email     string
 	Password  Password
 	Activated bool
-	Version   int
+	Version   int32
 }
 
 func (u *User) IsAnonymous() bool {

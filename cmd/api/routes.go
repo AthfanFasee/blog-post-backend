@@ -9,7 +9,8 @@ import (
 
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
-
+	router.RedirectFixedPath = true
+	
 	// Converting our err helpers as handlers and using them instead of default err handlers
 	router.NotFound = http.HandlerFunc(app.notFoundResponse)
 	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
@@ -37,5 +38,5 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPut, "/api/v1/auth/activate", app.activateUserHandler)
 	router.HandlerFunc(http.MethodPost, "/api/v1/auth/login", app.createAuthenticationTokenHandler)
 
-	return app.metrics(app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(router)))))
+	return app.metrics(app.recoverPanic(app.secureHeaders(app.enableCORS(app.rateLimit(app.authenticate(router))))))
 }

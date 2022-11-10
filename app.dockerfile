@@ -24,4 +24,4 @@ COPY /migrations ./migration
 
 EXPOSE 3001
 CMD [ "/app/main" ]
-ENTRYPOINT [ "/app/start.sh" ]
+ENTRYPOINT [ "/app/main", "--env", "production", "--cors-trusted-origins", "http://localhost:3000" ]

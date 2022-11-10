@@ -28,7 +28,7 @@ confirm:
 ## run/api: run the cmd/api application
 .PHONY: run/api
 run/api:
-	go run ./cmd/api -db-dsn=${DB_DSN}
+	go run ./cmd/api
 
 ## db/psql: connect to the database using psql
 .PHONY: db/psql

@@ -20,4 +20,4 @@ services:
   depends_on:
    - postgres
   entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh" ]
-  command: [ "/app/main" ]
+  command: [ "/app/main", "--env", "production", "--cors-trusted-origins", "http://localhost:3000" ]
