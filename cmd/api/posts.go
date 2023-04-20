@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -121,10 +120,6 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Location header mentioning from which URL client can find the newly-created resource at
-	headers := make(http.Header)
-	headers.Set("Location", fmt.Sprintf("api/v1/posts/%d", post.ID))
-
 	PostResponseBody := dto.PostResponseBody{
 		ID:        post.ID,
 		Title:     post.Title,
@@ -136,7 +131,7 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		UserName:  user.Name,
 	}
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"post": PostResponseBody}, headers)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"post": PostResponseBody}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

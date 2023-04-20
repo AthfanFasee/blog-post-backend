@@ -34,7 +34,7 @@ func (p PostModel) GetAll(title string, filters Filters) ([]*dto.PostResponseBod
 	SELECT count(*) OVER(), p.id, p.title, p.post_text, p.img, p.read_time, p.liked_by, p.created_by, p.created_at, u.name
 	FROM posts p
 	INNER JOIN users u ON p.created_by = u.id
-	WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
+	WHERE (to_tsvector('english', title) @@ plainto_tsquery('english', $1) OR $1 = '')
 	AND (created_by = $2 OR $2 = 0)
 	ORDER BY %s %s, id %s
 	LIMIT $3 OFFSET $4`, filters.sortParam(), filters.sortDirection(), filters.sortDirection())
