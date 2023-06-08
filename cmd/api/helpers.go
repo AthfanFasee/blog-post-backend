@@ -28,6 +28,7 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 	js = append(js, '\n')
 
 	// Go will not loop over if the map is nil
+	// The reason for not using Set here is that Set takes string as value, but in here our value is a []string
 	for key, value := range headers {
 		w.Header()[key] = value
 	}

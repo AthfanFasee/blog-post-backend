@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Equal[T comparable](t *testing.T, actual, expected T) {
+func Equal[T comparable](t testing.TB, actual, expected T) {
 	t.Helper()
 
 	if actual != expected {
@@ -13,7 +13,7 @@ func Equal[T comparable](t *testing.T, actual, expected T) {
 	}
 }
 
-func StringContains(t *testing.T, actualString, expectedSubString string) {
+func StringContains(t testing.TB, actualString, expectedSubString string) {
 	t.Helper()
 
 	if !strings.Contains(actualString, expectedSubString) {
