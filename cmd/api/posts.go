@@ -18,7 +18,7 @@ func (app *application) showPostsHandler(w http.ResponseWriter, r *http.Request)
 
 	v := validator.New()
 
-	// Get the url.Values map containing the query string data
+	// Get the url.Values map containing the query string data.
 	queryString := r.URL.Query()
 
 	input.Filters.Sort = app.readString(queryString, "sort", "-id")
@@ -28,7 +28,6 @@ func (app *application) showPostsHandler(w http.ResponseWriter, r *http.Request)
 	input.Filters.Limit = app.readInt(queryString, "limit", 6, v)
 
 	// Add the supported sort values for this endpoint to the sort safelist.
-	// NEED TO FIGURE OUT MULTIPLE SORTING. ONE THIMNG IS U CAN USE CSV HELPER FOR SORTINGS TOO
 	input.Filters.SortSafeList = []string{"id", "title", "readtime", "likescount", "-id", "-title", "-readtime", "-likescount"}
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
@@ -143,7 +142,7 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 		app.badRequestResponse(w, r, err)
 	}
 
-	// Check if a post with provided id exists
+	// Check if a post with provided id exists.
 	post, err := app.models.Posts.Get(id)
 	if err != nil {
 		switch {
@@ -157,14 +156,14 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 
 	var input dto.UpdatePostRequestBody
 
-	// Decoding JSON values in to input struct
+	// Decoding JSON values in to input struct.
 	err = app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
 
-	// Copy values from req body to appropriate fields of post record
+	// Copy values from req body to appropriate fields of post record only if they are not nil.
 	if input.Title != nil {
 		post.Title = strings.TrimSpace(*input.Title)
 	}
@@ -180,7 +179,7 @@ func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request
 
 	v := validator.New()
 
-	// Title and PostText must be provided by the client (other fields are optional)
+	// Title and PostText must be provided by the client (other fields are optional when updating).
 	if nil == input.Title {
 		v.AddError("title", "must be provided")
 	}
@@ -253,7 +252,7 @@ func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) 
 		app.notFoundResponse(w, r)
 	}
 
-	// Check if a post with provided id exists
+	// Check if a post with provided id exists.
 	post, userName, err := app.models.Posts.GetWithUserName(id)
 	if err != nil {
 		switch {
@@ -297,7 +296,7 @@ func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Reques
 		app.notFoundResponse(w, r)
 	}
 
-	// Check if a post with provided id exists
+	// Check if a post with provided id exists.
 	post, userName, err := app.models.Posts.GetWithUserName(id)
 	if err != nil {
 		switch {

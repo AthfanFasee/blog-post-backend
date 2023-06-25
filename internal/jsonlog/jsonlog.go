@@ -87,14 +87,15 @@ func (l *Logger) print(level Level, message string, properties map[string]string
 		line = []byte(LevelError.String() + ": unable to marshal log message:" + err.Error())
 	}
 
-	// Lock the mutex so that no two writes to the output destination cannot happen concurrently
+	// Lock the mutex so that no two writes to the output destination cannot happen concurrently.
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
 	return l.out.Write(append(line, '\n'))
 }
 
-// We also implement a Write() method on our Logger type so that it satisfies the io.Writer interface
+// We also implement a Write() method on our Logger type so that it satisfies the io.Writer interface.
+// By doing this, the Logger can be used as an output destination in functions or libraries that accept any io.Writer
 func (l *Logger) Write(message []byte) (n int, err error) {
 	return l.print(LevelError, string(message), nil)
 }

@@ -14,32 +14,53 @@ var mockUser = &User{
 	Version:   1,
 }
 
-type MockUserModel struct{}
+var mockUserModel = MockUserModel{
+	UserActivated: true,
+	UserAnonymous: false,
+}
+
+type MockUserModel struct {
+	UserActivated bool
+	UserAnonymous bool
+}
 
 func (u MockUserModel) Insert(user *User) error {
 	return nil
 }
 
-func (u MockUserModel) GetByEmail(email string) (*User, error) {
+func (MockUserModel) GetByEmail(email string) (*User, error) {
 	switch email {
-	case "Mocked Email":
+	case "mocked@email.com":
 		return mockUser, nil
 	default:
+		if mockUserModel.UserAnonymous {
+			return AnonymousUser, nil
+		}
 		return nil, ErrRecordNotFound
 	}
 }
 
-func (u MockUserModel) Update(user *User) error {
+func (MockUserModel) Update(user *User) error {
 	return nil
 }
 
-func (u MockUserModel) GetForToken(tokenScope, tokenPlainText string) (*User, error) {
+func (MockUserModel) GetForToken(tokenScope, tokenPlainText string) (*User, error) {
+	user := *mockUser
+	user.Activated = mockUserModel.UserActivated
 	switch {
 	case tokenScope == ScopeActivation:
-		return mockUser, nil
-	case tokenPlainText == "Mocked token":
-		return mockUser, nil
+		return &user, nil
+	case tokenPlainText != "":
+		return &user, nil
 	default:
+		if mockUserModel.UserAnonymous {
+			return AnonymousUser, nil
+		}
 		return nil, ErrRecordNotFound
 	}
+}
+
+// SetMockUserPassword sets the password for the mockUser.
+func SetMockUserPassword(passwordHash []byte) {
+	mockUser.Password.hash = passwordHash
 }

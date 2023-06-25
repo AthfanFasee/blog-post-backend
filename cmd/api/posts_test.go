@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/AthfanFasee/blog-post-backend/internal/assert.go"
+	"github.com/AthfanFasee/blog-post-backend/internal/assert"
 )
 
 func TestShowPostsHandler(t *testing.T) {

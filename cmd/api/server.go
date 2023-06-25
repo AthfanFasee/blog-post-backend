@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,6 +16,7 @@ func (app *application) serve() error {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", app.config.port),
 		Handler:      app.routes(),
+		ErrorLog:     log.New(app.logger, "", 0),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 20 * time.Second,
@@ -55,6 +57,7 @@ func (app *application) serve() error {
 		"env":  app.config.env,
 	})
 
+	// I NEED TO USE HTTPS INSTEAD (LETS GO 242)
 	err := srv.ListenAndServe()
 
 	if !errors.Is(err, http.ErrServerClosed) {

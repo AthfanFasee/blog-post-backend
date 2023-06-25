@@ -28,7 +28,7 @@ type TokenModel struct {
 	DB *sql.DB
 }
 
-// Create a Token instance with token added to it
+// Create a Token instance with token added to it.
 func generateToken(userID int64, timeToLive time.Duration, scope string) (*Token, error) {
 	token := &Token{
 		UserID: userID,
@@ -38,13 +38,13 @@ func generateToken(userID int64, timeToLive time.Duration, scope string) (*Token
 
 	randomBytes := make([]byte, 16)
 
-	// fill the byte slice with random bytes from operating system's CSPRNG
+	// Fill the byte slice with random bytes.
 	_, err := rand.Read(randomBytes)
 	if err != nil {
 		return nil, err
 	}
 
-	// Encode the byte slice to a base-32-encoded string
+	// Encode the byte slice to a base-32-encoded string.
 	token.Plaintext = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
 
 	hash := sha256.Sum256([]byte(token.Plaintext))
@@ -53,7 +53,19 @@ func generateToken(userID int64, timeToLive time.Duration, scope string) (*Token
 	return token, nil
 }
 
-// A shortcut for creating a new token and then inserting it to db
+// Create a token for testing purpose.
+func GenerateTestToken() string {
+	randomBytes := make([]byte, 16)
+
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return ""
+	}
+
+	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
+}
+
+// A shortcut for creating a new token and then inserting it to db.
 func (t TokenModel) New(userID int64, timeToLive time.Duration, scope string) (*Token, error) {
 	token, err := generateToken(userID, timeToLive, scope)
 	if err != nil {
