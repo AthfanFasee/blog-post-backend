@@ -7,8 +7,7 @@ import (
 	"strings"
 )
 
-// SHOULD BE CHANGED TO READ TIME
-var ErrInvalidRuntimeFormat = errors.New("invalid runtime format")
+var ErrInvalidReadtimeFormat = errors.New("invalid readtime format")
 
 type ReadTime int32
 
@@ -27,18 +26,18 @@ func (r ReadTime) MarshalJSON() ([]byte, error) {
 func (r *ReadTime) UnmarshalJSON(jsonValue []byte) error {
 	unquotedJSONValue, err := strconv.Unquote(string(jsonValue))
 	if err != nil {
-		return ErrInvalidRuntimeFormat
+		return ErrInvalidReadtimeFormat
 	}
 
 	parts := strings.Split(unquotedJSONValue, " ")
 
 	if len(parts) != 2 || parts[1] != "mins" {
-		return ErrInvalidRuntimeFormat
+		return ErrInvalidReadtimeFormat
 	}
 
 	i, err := strconv.ParseInt(parts[0], 10, 32)
 	if err != nil {
-		return ErrInvalidRuntimeFormat
+		return ErrInvalidReadtimeFormat
 	}
 
 	// Convert the int32 type to Readtime type, deference the receiver, and assign it to the underlying value of r.

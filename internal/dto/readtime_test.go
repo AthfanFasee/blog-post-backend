@@ -29,7 +29,7 @@ func TestReadTime_UnmarshalJSON(t *testing.T) {
 
 	invalidJsonValue := "\"invalid format\""
 	err = r.UnmarshalJSON([]byte(invalidJsonValue))
-	if err != ErrInvalidRuntimeFormat {
+	if err != ErrInvalidReadtimeFormat {
 		t.Fatalf("Expected error for invalid format")
 	}
 }

@@ -25,7 +25,7 @@ type PostResponseBody struct {
 	Title     string    `json:"title"`
 	PostText  string    `json:"postText"`
 	Img       string    `json:"img"`
-	ReadTime  ReadTime  `json:"readTime"` // If we use our custom Runtime type here (which has the underlying type int32) go will use Runtime type's method MarshalJSON to encode this to JSON and it will be encoded to Runtime type (a string in the format "<runtime> mins") instead of int
+	ReadTime  ReadTime  `json:"readTime"` // If we use our custom ReadTime type here (which has the underlying type int32) go will use ReadTime type's method MarshalJSON to encode this to JSON and it will be encoded to ReadTime type (a string in the format "<readtime> mins") instead of int.
 	LikedBy   []int64   `json:"likedBy,omitempty"`
 	CreatedBy int64     `json:"createdBy"`
 	UserName  string    `json:"userName"`
