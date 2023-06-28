@@ -20,7 +20,7 @@ var (
 	configPath = "."
 )
 
-// Read configuration from environemnt variables
+// Read configuration from environemnt variables.
 func LoadEnv() (config Config, err error) {
 	viper.SetConfigName(configName)
 	viper.SetConfigType(configType)

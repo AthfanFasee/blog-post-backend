@@ -95,7 +95,7 @@ func (l *Logger) print(level Level, message string, properties map[string]string
 }
 
 // We also implement a Write() method on our Logger type so that it satisfies the io.Writer interface.
-// By doing this, the Logger can be used as an output destination in functions or libraries that accept any io.Writer
+// By doing this, the Logger can be used as an output destination in functions or libraries that accept any io.Writer.
 func (l *Logger) Write(message []byte) (n int, err error) {
 	return l.print(LevelError, string(message), nil)
 }

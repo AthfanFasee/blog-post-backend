@@ -31,7 +31,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	// MAKE SURE USERNAME AND EMAIL PASSOWRD ARE MUST REQUIRED HERE
+
 	v := validator.New()
 
 	if data.ValidateUser(v, user); !v.Valid() {

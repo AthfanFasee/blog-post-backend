@@ -176,7 +176,7 @@ func (u UserModel) GetForToken(tokenScope, tokenPlainText string) (*User, error)
 	return &user, nil
 }
 
-// Password related
+// Password related.
 func (p *Password) Set(plainTextPassword string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(plainTextPassword), 12)
 	if err != nil {
@@ -203,7 +203,7 @@ func (p *Password) Matches(plainTextPassword string) (bool, error) {
 	return true, nil
 }
 
-// Validation related
+// Validation related.
 func ValidateEmail(v *validator.Validator, email string) {
 	v.Check(email != "", "email", "email must be provided")
 	v.Check(validator.Matches(email, validator.EmailRX), "email", "must be a valid email address")

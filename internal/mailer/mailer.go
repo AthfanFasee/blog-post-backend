@@ -9,6 +9,8 @@ import (
 	"github.com/go-mail/mail/v2"
 )
 
+// For now I'm using maintrap as SMTP server to send emails to one place for testing purpose.
+
 //go:embed "templates"
 var templateFS embed.FS
 
@@ -28,13 +30,13 @@ func New(host string, port int, username, password, sender string) Mailer {
 }
 
 func (m Mailer) Send(recipient, templateFile string, data interface{}) error {
-	// Parse the required template file from the embedded file system
+	// Parse the required template file from the embedded file system.
 	tmpl, err := template.New("email").ParseFS(templateFS, "templates/"+templateFile)
 	if err != nil {
 		return err
 	}
 
-	// Execute the named template, passing in the dynamic data and storing the result in a bytes.Buffer variable
+	// Execute the named template, passing in the dynamic data and storing the result in a bytes.Buffer variable.
 	subject := new(bytes.Buffer)
 	err = tmpl.ExecuteTemplate(subject, "subject", data)
 	if err != nil {
@@ -67,9 +69,9 @@ func (m Mailer) Send(recipient, templateFile string, data interface{}) error {
 			return nil
 		}
 		// If mail is not sent, sleep for a short time and retry.
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 	}
 
-	// If DianAndSend didn't return an err this err will be nil
+	// If DianAndSend didn't return an err this err will be nil.
 	return err
 }

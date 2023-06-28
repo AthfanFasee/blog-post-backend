@@ -9,6 +9,7 @@ import (
 	"github.com/AthfanFasee/blog-post-backend/internal/validator"
 )
 
+// When user logs in, create a token and send it to them.
 func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Email    string `json:"email"`

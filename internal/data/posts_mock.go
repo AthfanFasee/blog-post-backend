@@ -85,7 +85,7 @@ func (p MockPostModel) Insert(post *Post) error {
 	return nil
 }
 
-// Dk how to test race condition (the errEditConflict error case)
+// Consider testing race condition (the errEditConflict error case) in future
 func (p MockPostModel) Update(post *Post) error {
 	return nil
 }

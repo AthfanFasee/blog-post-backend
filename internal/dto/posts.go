@@ -11,7 +11,7 @@ type CreatePostRequestBody struct {
 	Img      string   `json:"img"`
 }
 
-// Define the input struct in a way, all the field got zero value 'nil'
+// Define the input struct in a way, all the field got zero value 'nil'.
 type UpdatePostRequestBody struct {
 	Title    *string   `json:"title"`
 	PostText *string   `json:"postText"`

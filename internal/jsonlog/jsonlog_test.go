@@ -89,5 +89,5 @@ func TestPrintError(t *testing.T) {
 	}
 	assert.Equal(t, assertedKey, "value")
 
-	assert.StringContains(t, logOutput["trace"].(string), "goroutine") // Ensure stack trace exists
+	assert.StringContains(t, logOutput["trace"].(string), "goroutine") // Ensure stack trace exists.
 }

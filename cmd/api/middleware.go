@@ -72,14 +72,14 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if app.config.limiter.enabled {
-			//  Use the realip.FromRequest() function to get the client's real IP address
+			// Use the realip.FromRequest() function to get the client's real IP address
 			// Used with a reverse-proxy
 			ip := realip.FromRequest(r)
 
 			mu.Lock()
 
-			if _, found := clients[ip]; !found {
-				// Allows an average of 2 requests per second, with a maximum of 4 requests in a single ‘burst’
+			if _, ok := clients[ip]; !ok {
+				// Allows an average of 2 requests per second, with a maximum of 4 requests in a single ‘burst’ (by default)
 				clients[ip] = &client{
 					limiter: rate.NewLimiter(rate.Limit(app.config.limiter.rps), app.config.limiter.burst)}
 			}

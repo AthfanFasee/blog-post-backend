@@ -108,7 +108,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	// LETS try and change this to cfg.db.dsn later
+	// Connect with DB
 	db, err := openDB(cfg)
 	if err != nil {
 		logger.PrintFatal(err, nil)

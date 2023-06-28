@@ -252,7 +252,7 @@ func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) 
 		app.notFoundResponse(w, r)
 	}
 
-	// Check if a post with provided id exists.
+	// Check if a post with provided id exists. Return username of the user who created the post as well.
 	post, userName, err := app.models.Posts.GetWithUserName(id)
 	if err != nil {
 		switch {
@@ -263,7 +263,7 @@ func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) 
 		}
 		return
 	}
-	// LATER DONT PASS USERID from FRONTEND
+
 	user := app.contextGetUser(r)
 
 	err = app.models.Posts.AddLike(post, user.ID)
@@ -296,7 +296,6 @@ func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Reques
 		app.notFoundResponse(w, r)
 	}
 
-	// Check if a post with provided id exists.
 	post, userName, err := app.models.Posts.GetWithUserName(id)
 	if err != nil {
 		switch {
@@ -307,7 +306,7 @@ func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Reques
 		}
 		return
 	}
-	// LATER DONT PASS USERID from FRONTEND
+
 	user := app.contextGetUser(r)
 
 	err = app.models.Posts.RemoveLike(post, user.ID)

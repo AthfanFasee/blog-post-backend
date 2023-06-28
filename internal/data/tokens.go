@@ -48,6 +48,9 @@ func generateToken(userID int64, timeToLive time.Duration, scope string) (*Token
 	token.Plaintext = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
 
 	hash := sha256.Sum256([]byte(token.Plaintext))
+
+	// sha256.Sum256() function returns an *array* of length 32.
+	// Convert it to a slice to make it easier to work with.
 	token.Hash = hash[:]
 
 	return token, nil

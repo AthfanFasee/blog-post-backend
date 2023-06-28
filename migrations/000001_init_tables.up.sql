@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 "name" text NOT NULL,
 "email" citext UNIQUE NOT NULL,
 "password_hash" bytea NOT NULL,
-"activated" BOOLEAN NOT NULL,
+"activated" BOOLEAN NOT NULL DEFAULT TRUE,
 "version" integer NOT NULL DEFAULT 1
 );
 
