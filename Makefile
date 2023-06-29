@@ -57,7 +57,7 @@ db/migrations/up: confirm
 
 ## audit: tidy dependencies and format, vet and test all code
 .PHONY: audit
-audit:
+audit: verify
 	@echo 'Formatting code...'
 	go fmt ./...
 	@echo 'Vetting code...'
