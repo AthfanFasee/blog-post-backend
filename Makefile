@@ -66,7 +66,7 @@ audit:
 	@echo 'Running tests...'
 	go test -race -vet=off ./...
 
-## vendor: tidy and vendor dependencies
+## vendor: tidy and verify dependencies
 .PHONY: verify
 verify:
 	@echo 'Tidying and verifying module dependencies...'
