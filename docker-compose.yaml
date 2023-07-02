@@ -19,5 +19,5 @@ services:
    - DB_DSN=postgres://root:secret@postgres:5432/blogpost?sslmode=disable
   depends_on:
    - postgres
-  entrypoint: [ "/app/wait-for", "postgres:5432", "--", "/app/start.sh" ]
+  entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh" ]
   command: [ "/app/main", "--env", "production", "--cors-trusted-origins", "http://localhost:3000" ]
