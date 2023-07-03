@@ -14,6 +14,15 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
+    - name: Set up date
+      id: date
+      run: |
+        echo "::set-output name=date::$(date +'%m/%d/%Y:%H:%M')"
+
+    - name: gh-describe
+      id: ghd
+      uses: proudust/gh-describe@v1.5.4
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -29,7 +38,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: blogpost
-        IMAGE_TAG: ${{ github.sha }}
+        IMAGE_TAG: ${{ steps.ghd.outputs.describe }}
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker build --build-arg VERSION=${{ steps.ghd.outputs.describe }} --build-arg CURRENT_TIME=${{ steps.date.outputs.date }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f app.dockerfile .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
