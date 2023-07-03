@@ -21,7 +21,7 @@ jobs:
       run: |
         echo "::set-output name=date::$(date +'%m/%d/%Y:%H:%M')"
 
-    - name: gh-describe
+    - name: Set up version
       id: ghd
       uses: proudust/gh-describe@v1.5.4
 
