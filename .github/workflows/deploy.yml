@@ -36,6 +36,17 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
+    - name: Setup Environment Variables
+      run: |
+        echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env
+        echo "DB_DSN=${{ secrets.DB_DSN }}" >> .env
+        echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+        echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+        echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env
+        echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
+        echo "SMTP_SENDER=${{ secrets.SMTP_SENDER }}" >> .env
+
+
     - name: Build, tag, and push docker image to Amazon ECR
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}

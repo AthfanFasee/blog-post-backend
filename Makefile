@@ -138,3 +138,9 @@ db/up/win:
 db/down/win:
 	@echo 'running db/migrate/down...'
 	migrate -path ./migrations -database ${DB_DSN} down
+
+.PHONY: db/downversion/win
+db/downversion/win:
+	@echo 'running db/migrate/force...'
+	migrate -path ./migrations -database ${DB_DSN} force 1
+
