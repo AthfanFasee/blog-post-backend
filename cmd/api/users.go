@@ -23,7 +23,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	user := &data.User{
 		Name:      strings.TrimSpace(input.Name),
 		Email:     strings.TrimSpace(input.Email),
-		Activated: false,
+		Activated: true,
 	}
 
 	err = user.Password.Set(input.Password)
