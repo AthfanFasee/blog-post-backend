@@ -46,7 +46,6 @@ jobs:
         echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
         echo "SMTP_SENDER=${{ secrets.SMTP_SENDER }}" >> .env
 
-
     - name: Build, tag, and push docker image to Amazon ECR
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
