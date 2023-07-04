@@ -35,7 +35,7 @@ jobs:
         echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
         echo "SMTP_SENDER=${{ secrets.SMTP_SENDER }}" >> .env
 
-    - name: Build Docker image
+    - name: Build and tag Docker image
       run: |
         docker build --build-arg VERSION=${{ steps.ghd.outputs.describe }} --build-arg CURRENT_TIME=${{ steps.date.outputs.date }} -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/blogpost:${{ steps.ghd.outputs.describe }} -f app.dockerfile .
 
