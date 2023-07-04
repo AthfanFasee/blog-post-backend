@@ -25,17 +25,6 @@ jobs:
       id: ghd
       uses: proudust/gh-describe@v1.5.4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-southeast-1
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
     - name: Setup Environment Variables
       run: |
         echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env
@@ -46,9 +35,9 @@ jobs:
         echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
         echo "SMTP_SENDER=${{ secrets.SMTP_SENDER }}" >> .env
 
-        - name: Build Docker image
-        run: |
-          docker build --build-arg VERSION=${{ steps.ghd.outputs.describe }} --build-arg CURRENT_TIME=${{ steps.date.outputs.date }} -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/blogpost:${{ steps.ghd.outputs.describe }} -f app.dockerfile .
+    - name: Build Docker image
+      run: |
+        docker build --build-arg VERSION=${{ steps.ghd.outputs.describe }} --build-arg CURRENT_TIME=${{ steps.date.outputs.date }} -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/blogpost:${{ steps.ghd.outputs.describe }} -f app.dockerfile .
 
     - name: Configure Google Cloud credentials
       uses: google-github-actions/setup-gcloud@v0.2.1
