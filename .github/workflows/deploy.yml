@@ -46,11 +46,25 @@ jobs:
         echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
         echo "SMTP_SENDER=${{ secrets.SMTP_SENDER }}" >> .env
 
-    - name: Build, tag, and push docker image to Amazon ECR
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: blogpost
-        IMAGE_TAG: ${{ steps.ghd.outputs.describe }}
+        - name: Build Docker image
+        run: |
+          docker build --build-arg VERSION=${{ steps.ghd.outputs.describe }} --build-arg CURRENT_TIME=${{ steps.date.outputs.date }} -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/blogpost:${{ steps.ghd.outputs.describe }} -f app.dockerfile .
+
+    - name: Configure Google Cloud credentials
+      uses: google-github-actions/setup-gcloud@v0.2.1
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        export_default_credentials: true
+
+    - name: Login to Google GCR
       run: |
-        docker build --build-arg VERSION=${{ steps.ghd.outputs.describe }} --build-arg CURRENT_TIME=${{ steps.date.outputs.date }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f app.dockerfile .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo ${{ secrets.GCP_SA_KEY }} | docker login -u _json_key --password-stdin https://gcr.io
+
+    - name: Push Docker image to Google GCR
+      run: |
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/blogpost:${{ steps.ghd.outputs.describe }}
+
+    - name: Deploy to Google Cloud Run
+      run: |
+        gcloud run deploy blogpost --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/blogpost:${{ steps.ghd.outputs.describe }} --region us-central1 --platform managed --allow-unauthenticated
