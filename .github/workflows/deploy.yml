@@ -48,7 +48,7 @@ jobs:
 
     - name: Login to Google GCR
       run: |
-        echo ${{ secrets.GCP_SA_KEY }} | docker login -u _json_key --password-stdin https://gcr.io
+        echo ${{ secrets.GCP_SA_KEY }} | base64 --decode | docker login -u _json_key --password-stdin https://gcr.io
 
     - name: Push Docker image to Google GCR
       run: |
