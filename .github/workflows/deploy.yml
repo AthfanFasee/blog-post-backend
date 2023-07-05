@@ -16,7 +16,7 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Set up date
+    - name: Set up Date
       id: date
       run: |
         echo "::set-output name=date::$(date +'%m/%d/%Y:%H:%M')"
