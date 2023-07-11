@@ -56,4 +56,4 @@ jobs:
 
     - name: Deploy to Google Cloud Run
       run: |
-        gcloud run deploy blogpost --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/blogpost:${{ steps.ghd.outputs.describe }} --region asia-southeast1 --platform managed --allow-unauthenticated
+        gcloud run deploy blogpost --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/blogpost:${{ steps.ghd.outputs.describe }} --region asia-southeast1 --platform managed --allow-unauthenticated --set-env-vars PORT=${{ secrets.SERVER_PORT }},DB_DSN=${{ secrets.DB_DSN }}
