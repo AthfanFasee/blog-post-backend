@@ -24,4 +24,4 @@ COPY /migrations ./migration
 
 EXPOSE 3001
 CMD [ "/app/main" ]
-ENTRYPOINT [ "/app/main", "--env", "production", "--cors-trusted-origins", "https://blog-post-frontend-go.vercel.app/?vercelToolbarCode=ItCgbHhnBdvsc66" ]
+ENTRYPOINT [ "/app/main", "--env", "production", "--cors-trusted-origins", "https://blog-post-frontend-go.vercel.app" ]
