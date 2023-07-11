@@ -13,7 +13,7 @@ RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/
 # Run Stage
 FROM alpine:3.16
 WORKDIR /app
-ENV DB_DSN=postgres://root:secret@localhost:5432/blogpost?sslmode=disable
+ENV DB_DSN=postgres://root:yc9K3ZWUYEtvdQDygT5F@blogpost.cb2qk4frnqge.ap-southeast-1.rds.amazonaws.com:5432/blogpost?sslmode=disable
 RUN echo DB_DSN
 COPY --from=builder /app/main .
 COPY --from=builder /app/migrate ./migrate
