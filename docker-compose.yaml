@@ -12,11 +12,13 @@ services:
     dockerfile: app.dockerfile
     args:
     - VERSION
-    - DB_DSN
+    - CURRENT_TIME
   ports:
    - "3001:3001"
   environment:
-   - DB_DSN=postgres://root:secret@postgres:5432/blogpost?sslmode=disable
+   - DB_DSN
+  env_file:
+   - app.env
   depends_on:
    - postgres
   entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh" ]
