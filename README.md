@@ -4,7 +4,7 @@ Tests are written using Go and API is tested end-to-end using Postman. Applicati
 Adopted multi-stage Docker file, and leveraged AWS ECR and RDS services. Implemented a stateful authentication process using tokens. Viper and cmd-flags are employed for app configuration. Load balancing is handled in Google Cloud Run, with support for HTTPS and TLS certificates.
 
 ## Technologies Used
-Golang, Google Cloud, AWS, PostgreSQL, FireBase, Docker, Postman, Jest
+Golang, Google Cloud, AWS, PostgreSQL, Docker, Postman
 
 ## Available Scripts
 All the available commands are mentioned in Makefile in the root directory.
