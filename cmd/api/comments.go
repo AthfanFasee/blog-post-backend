@@ -92,7 +92,7 @@ func (app *application) deleteCommentHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"message": "comment deleted succesfully"}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "comment deleted successfully"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

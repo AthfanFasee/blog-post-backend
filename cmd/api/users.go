@@ -70,7 +70,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 	})
 
-	err = app.writeJSON(w, http.StatusAccepted, envelope{"message": "user created succesfully"}, nil)
+	err = app.writeJSON(w, http.StatusAccepted, envelope{"message": "user created successfully"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -125,7 +125,7 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"message": "user activated succesfully"}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "user activated successfully"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

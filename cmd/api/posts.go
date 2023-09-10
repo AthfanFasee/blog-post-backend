@@ -240,7 +240,7 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"message": "post deleted succesfully"}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "post deleted successfully"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
