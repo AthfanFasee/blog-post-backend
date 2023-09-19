@@ -57,7 +57,6 @@ func (app *application) serve() error {
 		"env":  app.config.env,
 	})
 
-	// I NEED TO USE HTTPS INSTEAD (LETS GO 242)
 	err := srv.ListenAndServe()
 
 	if !errors.Is(err, http.ErrServerClosed) {
