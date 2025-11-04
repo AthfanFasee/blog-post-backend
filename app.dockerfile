@@ -5,7 +5,7 @@ COPY . .
 ARG VERSION
 ARG CURRENT_TIME
 ENV VERSION=$VERSION \
-CURRENT_TIME=$CURRENT_TIME
+    CURRENT_TIME=$CURRENT_TIME
 RUN GOOS=linux GOARCH=amd64 go build -ldflags="-s -X main.version=$VERSION -X main.buildTime=$CURRENT_TIME" -o main ./cmd/api
 RUN apk add curl
 RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz
@@ -27,4 +27,4 @@ RUN set -o allexport; source ./app.env; set +o allexport
 
 EXPOSE 3001
 CMD [ "/app/main" ]
-ENTRYPOINT [ "/app/main", "--env", "production", "--cors-trusted-origins", "$CORS_TRUSTED_ORIGINS" ]
+ENTRYPOINT ["/app/main", "--env", "production"]

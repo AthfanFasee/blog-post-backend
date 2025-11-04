@@ -5,13 +5,14 @@ import (
 )
 
 type Config struct {
-	ServerPort   int    `mapstructure:"SERVER_PORT"`
-	DSN          string `mapstructure:"DB_DSN"`
-	SmtpHost     string `mapstructure:"SMTP_HOST"`
-	SmtpPort     int    `mapstructure:"SMTP_PORT"`
-	SmtpUsername string `mapstructure:"SMTP_USERNAME"`
-	SmtpPassword string `mapstructure:"SMPT_PASSWORD"`
-	SmtpSender   string `mapstructure:"SMTP_SENDER"`
+	ServerPort         int    `mapstructure:"SERVER_PORT"`
+	DSN                string `mapstructure:"DB_DSN"`
+	SmtpHost           string `mapstructure:"SMTP_HOST"`
+	SmtpPort           int    `mapstructure:"SMTP_PORT"`
+	SmtpUsername       string `mapstructure:"SMTP_USERNAME"`
+	SmtpPassword       string `mapstructure:"SMPT_PASSWORD"`
+	SmtpSender         string `mapstructure:"SMTP_SENDER"`
+	CorsTrustedOrigins string `mapstructure:"CORS_TRUSTED_ORIGINS"`
 }
 
 var (

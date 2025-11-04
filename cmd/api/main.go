@@ -80,6 +80,11 @@ func main() {
 	cfg.smtp.port = env.SmtpPort
 	cfg.smtp.sender = env.SmtpSender
 
+	// Cors related
+	if env.CorsTrustedOrigins != "" {
+		cfg.cors.trustedOrigins = strings.Fields(env.CorsTrustedOrigins)
+	}
+
 	// Server Related
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.BoolVar(&cfg.metrics, "metrics", false, "Enable metrics")
@@ -91,14 +96,15 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
-	// Cors related
-	flag.Func("cors-trusted-origins", "Trusted CORS origins(separated by space)", func(val string) error {
-		cfg.cors.trustedOrigins = strings.Fields(val)
-		return nil
-	})
 
 	// Version control
 	displayVersion := flag.Bool("version", false, "Display version and exit")
+
+	// Add logging to verify CORS config
+	logger.PrintInfo("CORS configuration loaded", map[string]string{
+		"origins": strings.Join(cfg.cors.trustedOrigins, ", "),
+		"count":   fmt.Sprintf("%d", len(cfg.cors.trustedOrigins)),
+	})
 
 	flag.Parse()
 
