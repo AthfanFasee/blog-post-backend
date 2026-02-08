@@ -1,7 +1,7 @@
 package data
 
 import (
-	"fmt"
+	"errors"
 	"time"
 )
 
@@ -30,7 +30,7 @@ func (t MockTokenModel) New(userID int64, timeToLive time.Duration, scope string
 	case userID == 1 && scope == ScopeActivation:
 		return mockToken, nil
 	default:
-		return nil, fmt.Errorf("mocked Error")
+		return nil, errors.New("mocked Error")
 	}
 }
 

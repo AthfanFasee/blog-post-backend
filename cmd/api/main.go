@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -24,7 +25,7 @@ var (
 	buildTime string
 )
 
-// Configuration settings
+// Configuration settings.
 type config struct {
 	port    int
 	env     string
@@ -52,7 +53,7 @@ type config struct {
 	}
 }
 
-// Application dependencies
+// Application dependencies.
 type application struct {
 	config config
 	logger *jsonlog.Logger
@@ -103,7 +104,7 @@ func main() {
 	// Add logging to verify CORS config
 	logger.PrintInfo("CORS configuration loaded", map[string]string{
 		"origins": strings.Join(cfg.cors.trustedOrigins, ", "),
-		"count":   fmt.Sprintf("%d", len(cfg.cors.trustedOrigins)),
+		"count":   strconv.Itoa(len(cfg.cors.trustedOrigins)),
 	})
 
 	flag.Parse()
@@ -125,13 +126,13 @@ func main() {
 
 	// Custom and Dynamic Metrics
 	expvar.NewString("version").Set(version)
-	expvar.Publish("goroutines", expvar.Func(func() interface{} {
+	expvar.Publish("goroutines", expvar.Func(func() any {
 		return runtime.NumGoroutine()
 	}))
-	expvar.Publish("database", expvar.Func(func() interface{} {
+	expvar.Publish("database", expvar.Func(func() any {
 		return db.Stats()
 	}))
-	expvar.Publish("timestamp", expvar.Func(func() interface{} {
+	expvar.Publish("timestamp", expvar.Func(func() any {
 		return time.Now().Unix()
 	}))
 

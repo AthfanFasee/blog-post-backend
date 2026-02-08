@@ -19,8 +19,8 @@ func (f Filters) sortParam() string {
 	var sortParam string
 	for _, safeValue := range f.SortSafeList {
 		if f.Sort == safeValue {
-			switch {
-			case f.Sort == "-likescount":
+			switch f.Sort {
+			case "-likescount":
 				sortParam = "ARRAY_LENGTH(liked_by, 1)"
 				return sortParam
 			default:
@@ -61,7 +61,6 @@ func ValidateFilters(v *validator.Validator, f Filters) {
 
 	// Check that the sort parameter matches a value in safelist
 	v.Check(validator.In(f.Sort, f.SortSafeList...), "sort", "invalid sort value")
-
 }
 
 type Metadata struct {

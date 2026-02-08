@@ -80,7 +80,7 @@ func (c CommentModel) Insert(comment *Comment) error {
 	VALUES ($1, $2, $3)
 	RETURNING id`
 
-	args := []interface{}{comment.Text, comment.PostID, comment.CreatedBy}
+	args := []any{comment.Text, comment.PostID, comment.CreatedBy}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

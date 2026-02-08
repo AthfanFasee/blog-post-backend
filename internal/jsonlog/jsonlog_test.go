@@ -26,7 +26,7 @@ func TestPrintInfo(t *testing.T) {
 	assert.StringContains(t, logged, message)
 
 	// Unmarshal logged JSON.
-	var logOutput map[string]interface{}
+	var logOutput map[string]any
 	err := json.Unmarshal(buffer.Bytes(), &logOutput)
 	if err != nil {
 		t.Errorf("Failed to unmarshal log output: %v", err)
@@ -44,7 +44,7 @@ func TestPrintInfo(t *testing.T) {
 	}
 	assert.Equal(t, level, "INFO")
 
-	assertedKey, ok := logOutput["properties"].(map[string]interface{})["key"].(string)
+	assertedKey, ok := logOutput["properties"].(map[string]any)["key"].(string)
 	if !ok {
 		t.Errorf("logOutput[\"properties\"][\"key\"] is not of type string")
 	}
@@ -65,7 +65,7 @@ func TestPrintError(t *testing.T) {
 	logged := buffer.String()
 	assert.StringContains(t, logged, errMessage)
 
-	var logOutput map[string]interface{}
+	var logOutput map[string]any
 	err := json.Unmarshal(buffer.Bytes(), &logOutput)
 	if err != nil {
 		t.Errorf("Failed to unmarshal log output: %v", err)
@@ -83,7 +83,7 @@ func TestPrintError(t *testing.T) {
 	}
 	assert.Equal(t, level, "ERROR")
 
-	assertedKey, ok := logOutput["properties"].(map[string]interface{})["key"].(string)
+	assertedKey, ok := logOutput["properties"].(map[string]any)["key"].(string)
 	if !ok {
 		t.Errorf("logOutput[\"properties\"][\"key\"] is not of type string")
 	}

@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/AthfanFasee/blog-post-backend/internal/assert"
@@ -13,8 +14,8 @@ func TestReadTime_MarshalJSON(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	expectedJsonValue := "\"120 mins\""
-	assert.Equal(t, string(jsonValue), expectedJsonValue)
+	expectedJSONValueST1003default := "\"120 mins\""
+	assert.Equal(t, string(jsonValue), expectedJSONValueST1003default)
 }
 
 func TestReadTime_UnmarshalJSON(t *testing.T) {
@@ -27,9 +28,9 @@ func TestReadTime_UnmarshalJSON(t *testing.T) {
 
 	assert.Equal(t, r, ReadTime(120))
 
-	invalidJsonValue := "\"invalid format\""
-	err = r.UnmarshalJSON([]byte(invalidJsonValue))
-	if err != ErrInvalidReadtimeFormat {
+	invalidJSONValueST1003default := "\"invalid format\""
+	err = r.UnmarshalJSON([]byte(invalidJSONValueST1003default))
+	if !errors.Is(err, ErrInvalidReadtimeFormat) {
 		t.Fatalf("Expected error for invalid format")
 	}
 }

@@ -12,8 +12,8 @@ import (
 
 func (app *application) showPostsHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Title string
 		data.Filters
+		Title string
 	}
 
 	v := validator.New()
@@ -28,7 +28,16 @@ func (app *application) showPostsHandler(w http.ResponseWriter, r *http.Request)
 	input.Filters.Limit = app.readInt(queryString, "limit", 6, v)
 
 	// Add the supported sort values for this endpoint to the sort safelist.
-	input.Filters.SortSafeList = []string{"id", "title", "readtime", "likescount", "-id", "-title", "-readtime", "-likescount"}
+	input.Filters.SortSafeList = []string{
+		"id",
+		"title",
+		"readtime",
+		"likescount",
+		"-id",
+		"-title",
+		"-readtime",
+		"-likescount",
+	}
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.validationFailedResponse(w, r, v.Errors)
@@ -247,9 +256,18 @@ func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) {
+	app.handlePostLikeAction(w, r, app.models.Posts.AddLike)
+}
+
+func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Request) {
+	app.handlePostLikeAction(w, r, app.models.Posts.RemoveLike)
+}
+
+func (app *application) handlePostLikeAction(w http.ResponseWriter, r *http.Request, action func(*data.Post, int64) error) {
 	id, err := app.readIDParam(r)
 	if err != nil {
 		app.notFoundResponse(w, r)
+		return
 	}
 
 	// Check if a post with provided id exists. Return username of the user who created the post as well.
@@ -266,50 +284,8 @@ func (app *application) likePostHandler(w http.ResponseWriter, r *http.Request) 
 
 	user := app.contextGetUser(r)
 
-	err = app.models.Posts.AddLike(post, user.ID)
-	if err != nil {
-		app.badRequestResponse(w, r, err)
-		return
-	}
-
-	PostResponseBody := dto.PostResponseBody{
-		ID:        post.ID,
-		Title:     post.Title,
-		PostText:  post.PostText,
-		Img:       post.Img,
-		ReadTime:  post.ReadTime,
-		LikedBy:   post.LikedBy,
-		CreatedAt: post.CreatedAt,
-		CreatedBy: post.CreatedBy,
-		UserName:  *userName,
-	}
-
-	err = app.writeJSON(w, http.StatusOK, envelope{"post": PostResponseBody}, nil)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-	}
-}
-
-func (app *application) dislikePostHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := app.readIDParam(r)
-	if err != nil {
-		app.notFoundResponse(w, r)
-	}
-
-	post, userName, err := app.models.Posts.GetWithUserName(id)
-	if err != nil {
-		switch {
-		case errors.Is(err, data.ErrRecordNotFound):
-			app.notFoundResponse(w, r)
-		default:
-			app.serverErrorResponse(w, r, err)
-		}
-		return
-	}
-
-	user := app.contextGetUser(r)
-
-	err = app.models.Posts.RemoveLike(post, user.ID)
+	// Execute the like/dislike action
+	err = action(post, user.ID)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return

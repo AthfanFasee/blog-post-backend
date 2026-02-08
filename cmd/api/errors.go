@@ -12,14 +12,14 @@ func (app *application) logError(r *http.Request, err error) {
 	})
 }
 
-func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, status int, message interface{}) {
+func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, status int, message any) {
 	env := envelope{"error": message}
 
 	err := app.writeJSON(w, status, env, nil)
 	// Incase we cannot write a JSON err response, we will log the err and send the user a 500 err code by default
 	if err != nil {
 		app.logError(r, err)
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
@@ -65,7 +65,7 @@ func (app *application) invalidCredentialsResponse(w http.ResponseWriter, r *htt
 
 func (app *application) invalidAuthenticationTokenResponse(w http.ResponseWriter, r *http.Request) {
 	// Inform client that we expect them to authenticate using a bearer token
-	w.Header().Set("WWWW-Authenticate", "Bearer")
+	w.Header().Set("WWW-Authenticate", "Bearer")
 
 	message := "authentication token is invalid or missing"
 	app.errorResponse(w, r, http.StatusUnauthorized, message)

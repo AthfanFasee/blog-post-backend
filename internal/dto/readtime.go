@@ -1,3 +1,4 @@
+// Data transfer Objects
 package dto
 
 import (
@@ -11,9 +12,8 @@ var ErrInvalidReadtimeFormat = errors.New("invalid readtime format")
 
 type ReadTime int32
 
-// This is a custom MarshalJSON func. Go will call this method to encode any value which got Readtime type into JSON.
+// MarshalJSON custom func. Go will call this method to encode any value which got Readtime type into JSON.
 func (r ReadTime) MarshalJSON() ([]byte, error) {
-
 	jsonValue := fmt.Sprintf("%d mins", r)
 
 	// A JSON string must be wrapped in double quotes.
@@ -22,7 +22,7 @@ func (r ReadTime) MarshalJSON() ([]byte, error) {
 	return []byte(quotedJSONValue), nil
 }
 
-// This is a custom UnmarshalJSON func. Go will call this method to decode any JSON value which got Readtime type in the destination.
+// UnmarshalJSON custom func. Go will call this method to decode any JSON value which got Readtime type in the destination.
 func (r *ReadTime) UnmarshalJSON(jsonValue []byte) error {
 	unquotedJSONValue, err := strconv.Unquote(string(jsonValue))
 	if err != nil {

@@ -463,3 +463,21 @@ linters:
           - gosec
           - noctx
           - wrapcheck
+          - gochecknoglobals
+      # Allow globals in mock files
+      - path: '(.+)_mock\.go'
+        linters:
+          - gochecknoglobals
+      # Allow build-time variables in main.go
+      - path: '(.+)main\.go'
+        linters:
+          - gochecknoglobals
+      # Allow AnonymousUser sentinel value
+      - path: 'internal/data/users\.go'
+        text: "AnonymousUser is a global variable"
+        linters:
+          - gochecknoglobals
+      # Allow same-package tests in internal packages
+      - path: "internal/(.+)"
+        linters:
+          - testpackage

@@ -1,3 +1,4 @@
+// Package util provides various utility functions and helpers for the application.
 package util
 
 import (
@@ -21,7 +22,7 @@ var (
 	configPath = "."
 )
 
-// Read configuration from environemnt variables.
+// LoadEnv reads configuration from environemnt variables.
 func LoadEnv() (config Config, err error) {
 	viper.SetConfigName(configName)
 	viper.SetConfigType(configType)

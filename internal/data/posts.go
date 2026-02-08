@@ -42,7 +42,7 @@ func (p PostModel) GetAll(title string, filters Filters) ([]*dto.PostResponseBod
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []interface{}{title, filters.ID, filters.limit(), filters.offset()}
+	args := []any{title, filters.ID, filters.limit(), filters.offset()}
 
 	rows, err := p.DB.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -183,7 +183,7 @@ func (p PostModel) Insert(post *Post) error {
 		VALUES ($1, $2, $3, $4, $5) 
 		RETURNING id, created_at`
 
-	args := []interface{}{post.Title, post.PostText, post.Img, post.ReadTime, post.CreatedBy}
+	args := []any{post.Title, post.PostText, post.Img, post.ReadTime, post.CreatedBy}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -197,7 +197,7 @@ func (p PostModel) Update(post *Post) error {
 	SET title = $1, post_text = $2, img = $3, read_time = $4, version = version + 1
 	WHERE id = $5 AND version = $6`
 
-	args := []interface{}{
+	args := []any{
 		post.Title,
 		post.PostText,
 		post.Img,

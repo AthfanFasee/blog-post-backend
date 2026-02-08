@@ -1,6 +1,6 @@
 module github.com/AthfanFasee/blog-post-backend
 
-go 1.18
+go 1.25.5
 
 require (
 	github.com/felixge/httpsnoop v1.0.1

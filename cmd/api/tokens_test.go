@@ -16,7 +16,7 @@ import (
 
 func TestCreateAuthenticationTokenHandler(t *testing.T) {
 	// Create a function to compare maps.
-	mapEquals := func(x, y map[string]interface{}) bool {
+	mapEquals := func(x, y map[string]any) bool {
 		if len(x) != len(y) {
 			return false
 		}
@@ -59,14 +59,14 @@ func TestCreateAuthenticationTokenHandler(t *testing.T) {
 		name           string
 		requestBody    string
 		wantStatusCode int
-		wantBody       map[string]interface{}
+		wantBody       map[string]any
 	}{
 		{
 			name:           "Valid request",
 			requestBody:    `{"email":"mocked@email.com","password":"password"}`,
 			wantStatusCode: http.StatusCreated,
-			wantBody: map[string]interface{}{
-				"authentication_token": map[string]interface{}{
+			wantBody: map[string]any{
+				"authentication_token": map[string]any{
 					"token":  "",
 					"userID": float64(1), // After unmarshalling, numeric values become float64, not int
 				},
@@ -101,11 +101,11 @@ func TestCreateAuthenticationTokenHandler(t *testing.T) {
 
 			if tt.wantBody != nil {
 				// Unmarshal the response into a map, then delete the "expiry" field before comparison.
-				var responseMap map[string]interface{}
+				var responseMap map[string]any
 				if err := json.Unmarshal(body, &responseMap); err != nil {
 					t.Errorf("Failed to unmarshal response body: %v", err)
 				}
-				tokenMap := responseMap["authentication_token"].(map[string]interface{})
+				tokenMap := responseMap["authentication_token"].(map[string]any)
 				// Remove the expiry key as it changes rapidly and is hard to test.
 				delete(tokenMap, "expiry")
 

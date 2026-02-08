@@ -7,7 +7,7 @@ import (
 	"github.com/AthfanFasee/blog-post-backend/internal/data"
 )
 
-// Prevent naming collisions in request context by defining a custom type
+// Prevent naming collisions in request context by defining a custom type.
 type contextKey string
 
 const userContextKey = contextKey("user")

@@ -59,7 +59,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 
 	// Use background goroutine helper to send mail to the user
 	app.background(func() {
-		data := map[string]interface{}{
+		data := map[string]any{
 			"activationToken": token.Plaintext,
 			"userID":          user.ID,
 		}

@@ -46,7 +46,7 @@ func (u UserModel) Insert(user *User) error {
 	VALUES ($1, $2, $3, $4)
 	RETURNING id, created_at`
 
-	args := []interface{}{user.Name, user.Email, user.Password.hash, user.Activated}
+	args := []any{user.Name, user.Email, user.Password.hash, user.Activated}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -102,7 +102,7 @@ func (u UserModel) Update(user *User) error {
 	SET name = $1, email = $2, password_hash = $3, activated = $4, version = version + 1
 	WHERE id = $5 AND version = $6`
 
-	args := []interface{}{
+	args := []any{
 		user.Name,
 		user.Email,
 		user.Password.hash,
@@ -148,7 +148,7 @@ func (u UserModel) GetForToken(tokenScope, tokenPlainText string) (*User, error)
 
 	tokenHash := sha256.Sum256([]byte(tokenPlainText))
 
-	args := []interface{}{tokenHash[:], tokenScope, time.Now()}
+	args := []any{tokenHash[:], tokenScope, time.Now()}
 
 	var user User
 

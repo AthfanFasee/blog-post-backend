@@ -31,7 +31,11 @@ func TestApplication_RecoverPanic(t *testing.T) {
 	app.recoverPanic(panicHandler).ServeHTTP(responseRecorder, request)
 
 	assert.Equal(t, http.StatusInternalServerError, responseRecorder.Code)
-	assert.StringContains(t, responseRecorder.Body.String(), "the server encountered a problem and could not process your request")
+	assert.StringContains(
+		t,
+		responseRecorder.Body.String(),
+		"the server encountered a problem and could not process your request",
+	)
 }
 
 func TestSecureHeaders(t *testing.T) {
@@ -192,7 +196,8 @@ func TestApplication_RequireActivatedUser(t *testing.T) {
 			request = request.WithContext(ctx)
 
 			// Call requireAuthenticatedUser function first to set the authenticated user.
-			app.requireAuthenticatedUser(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(responseRecorder, request)
+			app.requireAuthenticatedUser(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).
+				ServeHTTP(responseRecorder, request)
 
 			// Create a new Recorder for the second middleware.
 			responseRecorder = httptest.NewRecorder()
@@ -293,7 +298,11 @@ func TestMetrics(t *testing.T) {
 
 		totalProcessingTimeMicroseconds := expvar.Get("total_processing_time_μs").(*expvar.Int)
 		if totalProcessingTimeMicroseconds.Value() <= 0 {
-			t.Errorf("Expected processing time to be greater than %d but got %d", 0, totalProcessingTimeMicroseconds.Value())
+			t.Errorf(
+				"Expected processing time to be greater than %d but got %d",
+				0,
+				totalProcessingTimeMicroseconds.Value(),
+			)
 		}
 
 		totalResponsesSentByStatus := expvar.Get("total_responses_sent_by_status").(*expvar.Map)

@@ -31,11 +31,11 @@ func TestHealthCheckHandler(t *testing.T) {
 	} else {
 		t.Error("status is not a string")
 	}
-	// data["systemInfo"] is originally unmarshalled from JSON into a map[string]interface{}.
-	// JSON objects unmarshal into map[string]interface{} by default.
-	systemInfo, ok := data["systemInfo"].(map[string]interface{})
+	// data["systemInfo"] is originally unmarshalled from JSON into a map[string]any.
+	// JSON objects unmarshal into map[string]any by default.
+	systemInfo, ok := data["systemInfo"].(map[string]any)
 	if !ok {
-		t.Fatal("expected 'systemInfo' to be in the format map[string]interface{}")
+		t.Fatal("expected 'systemInfo' to be in the format map[string]any")
 	}
 
 	_, ok = systemInfo["environment"]
@@ -46,5 +46,4 @@ func TestHealthCheckHandler(t *testing.T) {
 
 	_, ok = systemInfo["build_time"]
 	assert.Equal(t, ok, true)
-
 }

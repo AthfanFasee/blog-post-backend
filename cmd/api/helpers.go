@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -14,9 +15,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type envelope map[string]interface{}
+type envelope map[string]any
 
-// Encode data into JSON
+// Encode data into JSON.
 func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 	// MarshalIndent will return a []byte containing the encoded JSON with any prefix and indent added
 	js, err := json.MarshalIndent(data, "", "\t")
@@ -29,19 +30,22 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 
 	// Go will not loop over if the map is nil
 	// The reason for not using Set here is that Set takes string as value, but in here our value is a []string
-	for key, value := range headers {
-		w.Header()[key] = value
-	}
+	maps.Copy(w.Header(), headers)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	w.Write(js)
+
+	if _, err := w.Write(js); err != nil {
+		app.logger.PrintError(err, map[string]string{
+			"context": "failed to write JSON response",
+		})
+	}
 
 	return nil
 }
 
-// Decode JSON values
-func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
+// Decode JSON values.
+func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 	// Limit the size of body to 1MB
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
@@ -100,7 +104,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 	return nil
 }
 
-// Read ID param from request url
+// Read ID param from request url.
 func (app *application) readIDParam(r *http.Request) (int64, error) {
 	// Retrieve a slice containing req parameter names and values
 	params := httprouter.ParamsFromContext(r.Context())
@@ -113,7 +117,7 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 	return id, nil
 }
 
-// Return a string value from query string map or a default value
+// Return a string value from query string map or a default value.
 func (app *application) readString(queryString url.Values, key string, defaultValue string) string {
 	stringValue := queryString.Get(key)
 
@@ -125,7 +129,7 @@ func (app *application) readString(queryString url.Values, key string, defaultVa
 	return stringValue
 }
 
-// Return an int value from query string map or a default value
+// Return an int value from query string map or a default value.
 func (app *application) readInt(queryString url.Values, key string, defaultValue int, v *validator.Validator) int {
 	stringValue := queryString.Get(key)
 
@@ -142,13 +146,9 @@ func (app *application) readInt(queryString url.Values, key string, defaultValue
 	return intValue
 }
 
-// takes an artbitary function as parameter
+// takes an artbitary function as parameter.
 func (app *application) background(fn func()) {
-	app.wg.Add(1)
-
-	go func() {
-		defer app.wg.Done()
-
+	app.wg.Go(func() {
 		// Recover panic
 		defer func() {
 			if err := recover(); err != nil {
@@ -157,5 +157,5 @@ func (app *application) background(fn func()) {
 		}()
 
 		fn()
-	}()
+	})
 }
